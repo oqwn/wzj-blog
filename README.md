@@ -81,7 +81,7 @@ npm run new -- learning-notes "最近的一些学习笔记"
 
 这个命令不会覆盖同名文章。写好后把 `draft: true` 改为 `draft: false`。
 
-目前的 `hello-world.md` 是可以自由修改或删除的开篇示例；`markdown-example.md` 是默认隐藏的写作模板。根目录原有的 `index.md` 已保留，Astro 不会将它作为博客文章发布。
+`markdown-example.md` 是默认隐藏的写作模板。根目录原有的 `index.md` 已保留，Astro 不会将它作为博客文章发布。
 
 ## 在本地预览
 
@@ -142,14 +142,14 @@ git push origin main
 同级文章链接推荐使用相对网页地址，而不是 `.md` 源文件地址：
 
 ```markdown
-[第一篇文章](../hello-world/)
+[另一篇文章](../my-post/)
 ```
 
 标题会生成可展开的文章目录。围栏代码块标注语言后，发布页面会显示语言标签、行号和接近 IDEA 的深色语法高亮；`ts`、`py` 等常见缩写也支持。未指定或无法识别的语言按纯文本显示。右上角“复制”可复制完整源码并显示反馈，保留换行和缩进，不带行号；展开后的 Mermaid 源码同样支持。自动复制不可用时会选中源码并提示手动复制。长代码在框内横向滚动。代码样式配置在 `src/lib/code-blocks.mjs`。支持列表、引用、表格和任务列表。Pages CMS 的排版视图用于写作，代码高亮等细节以正式页面为准。
 
 ## Mermaid、draw.io 与数学公式
 
-[完整的渲染测试文章](https://oqwn.github.io/wzj-blog/posts/markdown-rendering-lab/)包含三种 Mermaid 图、draw.io SVG、代码、表格对齐、合并单元格、任务列表、脚注、折叠和数学公式。它验证这些具体样例，不代表兼容所有 Markdown 方言。
+博客支持 Mermaid 图、draw.io 导出的 SVG、代码高亮、表格对齐、合并单元格、任务列表、脚注、折叠和数学公式。Markdown 回归测试保留在 `tests/markdown.test.mjs`，不代表兼容所有 Markdown 方言。
 
 使用 `mermaid` 代码块写图，推荐提供可访问性说明：
 

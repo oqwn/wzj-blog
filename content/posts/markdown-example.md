@@ -40,7 +40,7 @@ console.log(greet('世界'));
 
 ## 链接与图片
 
-[回到第一篇文章](../hello-world/)
+[回到博客首页](../../)
 
 图片建议放到 `content/images/`，在 Markdown 中使用相对路径，例如：
 
