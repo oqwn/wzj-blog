@@ -22,7 +22,7 @@ a:hover { color: var(--accent); text-decoration: underline; }
 ::selection { background: #d4e8df; }
 h1, h2, h3, p { margin: 0; }
 img { max-width: 100%; height: auto; }
-.site-shell { max-width: 824px; padding: 0 28px; margin: auto; }
+.site-shell { width: 100%; padding: 0 28px; }
 .site-header { min-height: 82px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--line); }
 .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; white-space: nowrap; }
 .brand:hover { text-decoration: none; }
