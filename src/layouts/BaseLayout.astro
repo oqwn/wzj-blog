@@ -26,7 +26,7 @@ const policy = "default-src 'none'; script-src 'none'; style-src 'self' 'unsafe-
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="author" content={blog.author} />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#f7faf9" />
     <meta name="generator" content={Astro.generator} />
     {noindex && <meta name="robots" content="noindex" />}
     {!noindex && <link rel="canonical" href={canonical} />}
@@ -47,12 +47,16 @@ const policy = "default-src 'none'; script-src 'none'; style-src 'self' 'unsafe-
     <div class="site-shell">
       <header class="site-header">
         <a class="brand" href={withBase()} aria-label={`${blog.title}首页`}>
+          <span class="brand-mark" aria-hidden="true">温</span>
           <span>{blog.title}</span>
         </a>
         <nav aria-label="主导航">
           <a href={withBase()} aria-current={!article && !noindex ? 'page' : undefined}>文章</a>
           <a href={withBase('rss.xml')}>RSS</a>
-          <a href={blog.editor} rel="noreferrer" aria-label="写作（Pages CMS）">写作</a>
+          <a class="writing-link" href={blog.editor} rel="noreferrer" aria-label="写作（Pages CMS）">
+            <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.8 3.2 3 3M3 10l7.7-7.7a1.4 1.4 0 0 1 2 0l1 1a1.4 1.4 0 0 1 0 2L6 13l-3.5.5L3 10Z" /></svg>
+            写作
+          </a>
         </nav>
       </header>
       <main id="main"><slot /></main>
