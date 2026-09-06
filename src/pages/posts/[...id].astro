@@ -1,0 +1,56 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPosts, formatDate, readingMinutes, type Post } from '../../lib/posts';
+import { withBase, postPath } from '../../lib/paths';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post, index) => ({
+    params: { id: post.id },
+    props: { post, newer: posts[index - 1], older: posts[index + 1] },
+  }));
+}
+
+interface Props { post: Post; newer?: Post; older?: Post; }
+const { post, newer, older } = Astro.props;
+const { Content, headings } = await render(post);
+const toc = headings.filter(({ depth }) => depth === 2 || depth === 3);
+---
+<BaseLayout title={post.data.title} description={post.data.description || post.data.title} article published={post.data.date} updated={post.data.updated}>
+  <article>
+    <header class="article-header">
+      <a class="back-link" href={withBase()}>← 全部文章</a>
+      <ul class="tags" aria-label="文章标签">{post.data.tags.map((tag) => <li>{tag}</li>)}</ul>
+      <h1>{post.data.title}</h1>
+      {post.data.description && <p class="article-description">{post.data.description}</p>}
+      <div class="article-info">
+        <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+        <span>约 {readingMinutes(post.body)} 分钟阅读</span>
+        {post.data.updated && <span>更新于 <time datetime={post.data.updated.toISOString()}>{formatDate(post.data.updated)}</time></span>}
+      </div>
+    </header>
+    <div class="article-grid">
+      <div class="prose"><Content /></div>
+      {toc.length > 1 && (
+        <aside class="toc" aria-label="文章目录">
+          <details open>
+            <summary>本篇目录</summary>
+            <ol>{toc.map((heading) => (
+              <li class:list={{ 'toc-subheading': heading.depth === 3 }}>
+                <a href={`#${heading.slug}`}>{heading.text}</a>
+              </li>
+            ))}</ol>
+          </details>
+        </aside>
+      )}
+    </div>
+    <footer class="article-end">
+      <a href={withBase()}>← 回到全部文章</a>
+      {(newer || older) && <nav class="post-navigation" aria-label="相邻文章">
+        {newer && <a href={postPath(newer.id)}><span>较新的文章</span>{newer.data.title}</a>}
+        {older && <a href={postPath(older.id)}><span>较早的文章</span>{older.data.title}</a>}
+      </nav>}
+    </footer>
+  </article>
+</BaseLayout>

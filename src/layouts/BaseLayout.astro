@@ -1,0 +1,64 @@
+---
+import { blog } from '../config';
+import { withBase } from '../lib/paths';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  article?: boolean;
+  published?: Date;
+  updated?: Date;
+  noindex?: boolean;
+}
+
+const { title, description = blog.description, article = false, published, updated, noindex = false } = Astro.props;
+const pageTitle = title ? `${title} | ${blog.title}` : blog.title;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="author" content={blog.author} />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="generator" content={Astro.generator} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {!noindex && <link rel="canonical" href={canonical} />}
+    <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
+    <link rel="alternate" type="application/rss+xml" title={blog.title} href={withBase('rss.xml')} />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    {!noindex && <meta property="og:url" content={canonical} />}
+    <meta property="og:site_name" content={blog.title} />
+    <meta property="og:locale" content="zh_CN" />
+    {published && <meta property="article:published_time" content={published.toISOString()} />}
+    {updated && <meta property="article:modified_time" content={updated.toISOString()} />}
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到正文</a>
+    <div class="site-shell">
+      <header class="site-header">
+        <a class="brand" href={withBase()} aria-label={`${blog.title}首页`}>
+          <span class="brand-mark" aria-hidden="true">w.</span>
+          <span>{blog.title}</span>
+        </a>
+        <nav aria-label="主导航">
+          <a href={withBase()} aria-current={!article && !noindex ? 'page' : undefined}>文章</a>
+          <a href={blog.github}>GitHub <span aria-hidden="true">↗</span></a>
+          <a href={withBase('rss.xml')}>RSS</a>
+        </nav>
+      </header>
+      <main id="main"><slot /></main>
+      <footer class="site-footer">
+        <span>© {new Date().getFullYear()} {blog.author}</span>
+        <span>保持好奇，慢慢写。</span>
+        <a href={blog.repository}>博客源码 <span aria-hidden="true">↗</span></a>
+      </footer>
+    </div>
+  </body>
+</html>
