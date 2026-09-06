@@ -11,6 +11,8 @@
 
 工作流在 `.github/workflows/pages.yml`。它使用官方的 Node.js 和 Pages Actions，不需要自己维护 `gh-pages` 分支，也不需要个人令牌。
 
+工作流会安装 Playwright Chromium 与中文字体，供 Mermaid 在构建时生成静态图片，并运行桌面、手机宽度的文章渲染检查。图表语法错误、公式错误或页面检查失败会阻止部署，线上保留上一次成功版本。draw.io 的 SVG 已随源文件提交，构建时不需要连接 draw.io。
+
 首次发布可能需要等待 Pages 地址生效。如果失败，先查看 Actions 的报错步骤；常见原因是 Pages Source 未改为 GitHub Actions、Markdown 的日期或字段格式错误、图片或链接目标不存在。不要通过放宽工作流权限绕过这些问题。
 
 参考：[GitHub 自定义 Pages 工作流](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)、[Astro 的 Pages 部署说明](https://docs.astro.build/en/guides/deploy/github/)。
@@ -37,9 +39,11 @@
 
 以 Cloudflare Pages 为例：
 
+先确认平台构建环境能安装 Chromium 和系统依赖。Mermaid 的构建需要这些依赖；若平台受限，推荐在 GitHub Actions 中构建 `dist/`，再把静态产物上传到目标平台。
+
 1. 登录平台，创建 Pages 项目，连接 GitHub 的 `oqwn/wzj-blog`。
 2. 选择生产分支 `main`，框架选 Astro 或静态网站。
-3. 构建命令填 `npm run build`，输出目录填 `dist`，Node.js 版本设为 `24`。
+3. 安装依赖后准备图表渲染环境：`npx playwright install --with-deps chromium --only-shell`，并安装中文字体。构建命令填 `npm run build`，输出目录填 `dist`，Node.js 版本设为 `24`。
 4. 环境变量设为 `BASE_PATH=/` 和 `SITE_URL=https://你的最终域名`。
 5. 部署后检查首页、文章、图片、RSS 和 404 页面。
 

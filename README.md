@@ -91,18 +91,21 @@ npm run new -- learning-notes "最近的一些学习笔记"
 nvm install
 nvm use
 npm ci
+npm run setup:diagrams
 npm run dev
 ```
 
 打开终端显示的地址，并加上 `/wzj-blog/`，通常是 <http://localhost:4321/wzj-blog/>。保存 Markdown 后即可查看更新。
 
 ```bash
-npm run verify    # 类型检查、写作脚本测试、生产构建、链接和草稿检查
+npm run verify    # 类型、Markdown 渲染、生产构建、链接、草稿和浏览器检查
 npm run build     # 生成 dist/ 静态网站
 npm run preview   # 预览生产构建
 ```
 
 Astro 7 的开发服务可能在后台运行；可使用 `npx astro dev stop` 停止。
+
+`setup:diagrams` 首次下载用于生成 Mermaid 图片的 Chromium。更新 Playwright 版本后需要再运行一次。Linux 若缺少系统依赖，执行 `npx playwright install --with-deps chromium --only-shell`，并安装中文字体（例如 `fonts-noto-cjk`）。GitHub Actions 已配置好这些步骤。
 
 ## 发布文章
 
@@ -144,6 +147,31 @@ git push origin main
 
 标题会生成可展开的文章目录，围栏代码块标注语言后在发布页面自动高亮。支持列表、引用、表格和任务列表。Pages CMS 的排版视图用于写作，代码高亮等细节以正式页面为准。
 
+## Mermaid、draw.io 与数学公式
+
+[完整的渲染测试文章](https://oqwn.github.io/wzj-blog/posts/markdown-rendering-lab/)包含三种 Mermaid 图、draw.io SVG、代码、表格对齐、合并单元格、任务列表、脚注、折叠和数学公式。它验证这些具体样例，不代表兼容所有 Markdown 方言。
+
+使用 `mermaid` 代码块写图，推荐提供可访问性说明：
+
+````markdown
+```mermaid
+flowchart LR
+    accTitle: 文章发布流程
+    accDescr: 写作后保存到仓库，再发布到博客。
+    A[写作] --> B[保存] --> C[发布]
+```
+````
+
+Mermaid 在构建时渲染成 SVG 图片，读者不需要运行脚本；大图可以在图框中横向滚动。错误语法会导致构建失败，保留上一次成功部署。
+
+draw.io 先导出 SVG 或 PNG，再像普通图片一样引用。原始 `.drawio` 文件可与图片一起放在 `content/images/`，作为可编辑源文件保存，但它不是浏览器能直接显示的图片。示例图由 draw.io 官方嵌入接口导出，SVG 已存入仓库，后续构建不依赖 draw.io 服务。
+
+公式使用 `$a^2+b^2=c^2$`（行内）或独占行的 `$$` 包住公式（独立公式）。支持 KaTeX 语法；公式样式和字体一起打包，不使用外部 CDN。显示美元金额时可以转义为 `\$19.99`。
+
+本项目使用 Astro 7 的 `unified` Markdown 处理器，配置在 `src/lib/markdown.mjs`。网页后台编辑含 Mermaid、公式或复杂 HTML 的文章时，使用 **Source** 模式；后台的 Editor 模式不保证与博客的扩展兼容。MDX、Obsidian 双链、`:::note` 等私有语法尚未接入；代码块不执行，页面禁止脚本和 iframe。
+
+`npm run verify` 会检查有效与无效 Mermaid、特殊字符、公式和 GFM，并用禁用 JavaScript 的浏览器在 1440、390、320px 宽度下检查测试文章。可以单独运行 `npm run test:render`；设置 `SCREENSHOT_DIR=/tmp/blog-rendering` 可保存图表截图。删除测试文章后，浏览器样本检查会跳过，独立的 Markdown 回归测试仍会运行。
+
 ## 修改个人信息与外观
 
 - `src/config.ts`：博客名称、作者、介绍、GitHub 地址和写作后台链接。
@@ -161,6 +189,8 @@ git push origin main
 完整配置和免费平台对比见 [部署说明](docs/deployment.md)。
 
 任何静态托管平台都可使用以下配置：
+
+以下构建命令要求环境已安装上述 Chromium 及系统依赖。受限平台若无法安装，可由 GitHub Actions 构建，再将 `dist/` 静态产物上传到该平台；不要直接沿用缺少图表渲染环境的构建步骤。
 
 | 设置 | 值 |
 | --- | --- |

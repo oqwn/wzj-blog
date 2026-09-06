@@ -1,4 +1,6 @@
 import { defineConfig } from 'astro/config';
+import { unified } from '@astrojs/markdown-remark';
+import { markdownPlugins, syntaxHighlight, shikiConfig } from './src/lib/markdown.mjs';
 
 export default defineConfig({
   site: process.env.SITE_URL || 'https://oqwn.github.io',
@@ -6,6 +8,8 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'always',
   markdown: {
-    shikiConfig: { theme: 'github-light' },
+    processor: unified(markdownPlugins),
+    syntaxHighlight,
+    shikiConfig,
   },
 });

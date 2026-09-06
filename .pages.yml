@@ -51,6 +51,7 @@ content:
       - name: body
         label: 正文
         type: rich-text
+        description: 含 Mermaid、公式或复杂 HTML 时使用 Source 模式；以发布后的博客效果为准。
         options:
           format: markdown
           switcher: true

@@ -39,6 +39,7 @@ for (const file of htmlFiles) {
   const html = await readFile(file, 'utf8');
   const name = relative(root, file);
   assert.doesNotMatch(html, /<script\b|<input\b[^>]*type="password"/i, `${name}: public pages must not handle GitHub credentials`);
+  assert.doesNotMatch(html, /class="[^"]*katex-error/, `${name}: invalid math must be fixed before publishing`);
   assert.match(html, /script-src (?:'|&#39;|&#x27;)none(?:'|&#39;|&#x27;)/, `${name}: public pages must prohibit scripts`);
   assert.match(html, /connect-src (?:'|&#39;|&#x27;)none(?:'|&#39;|&#x27;)/, `${name}: public pages must prohibit API requests`);
   const route = name === 'index.html' ? '/' : `/${name.replace(/index\.html$/, '')}`;
