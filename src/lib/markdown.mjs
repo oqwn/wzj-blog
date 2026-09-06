@@ -1,6 +1,46 @@
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeMermaid from 'rehype-mermaid';
+import { rehypeShiki } from '@astrojs/markdown-remark';
+import { codeTheme, codeLineNumbers, rehypeCodeFrames } from './code-blocks.mjs';
+
+// Render a diagram once, retaining its original code in a native disclosure.
+function rehypeMermaidWithSource(options) {
+  const render = rehypeMermaid(options);
+  return async (tree, file) => {
+    const sources = [];
+    function walk(parent) {
+      for (const [index, node] of (parent.children || []).entries()) {
+        const code = node.tagName === 'pre' && node.children?.find((child) => child.tagName === 'code');
+        if (code?.properties?.className?.includes('language-mermaid')) sources.push({ parent, index, node });
+        else walk(node);
+      }
+    }
+    walk(tree);
+    await render(tree, file);
+    for (const { parent, index, node } of sources) {
+      const diagram = parent.children[index];
+      if (diagram.tagName !== 'img' || !String(diagram.properties?.id).startsWith('mermaid-')) continue;
+      parent.children[index] = {
+        type: 'element', tagName: 'div', properties: { className: ['mermaid-block'] },
+        children: [
+          diagram,
+          {
+            type: 'element', tagName: 'details', properties: { className: ['diagram-source'] },
+            children: [
+              { type: 'element', tagName: 'summary', properties: {}, children: [{ type: 'text', value: '查看 Mermaid 源码' }] },
+              node,
+            ],
+          },
+        ],
+      };
+    }
+  };
+}
+
+export const shikiConfig = { theme: codeTheme, transformers: [codeLineNumbers] };
+// Run Shiki after Mermaid so both ordinary code and retained diagram source get highlighted.
+export const syntaxHighlight = false;
 
 // Keep wide diagrams readable on narrow screens without widening the page.
 export function rehypeDiagramFigures() {
@@ -30,7 +70,7 @@ export const markdownPlugins = {
   remarkPlugins: [remarkMath],
   remarkRehype: { footnoteLabel: '脚注', footnoteBackLabel: '返回正文' },
   rehypePlugins: [
-    [rehypeMermaid, {
+    [rehypeMermaidWithSource, {
       strategy: 'img-svg',
       mermaidConfig: {
         securityLevel: 'strict',
@@ -46,9 +86,8 @@ export const markdownPlugins = {
       },
     }],
     rehypeDiagramFigures,
+    [rehypeShiki, shikiConfig],
+    rehypeCodeFrames,
     [rehypeKatex, { strict: 'error', trust: false }],
   ],
 };
-
-export const syntaxHighlight = { type: 'shiki', excludeLangs: ['mermaid', 'math'] };
-export const shikiConfig = { theme: 'github-light' };
