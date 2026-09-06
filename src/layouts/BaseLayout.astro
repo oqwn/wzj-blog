@@ -10,16 +10,20 @@ interface Props {
   published?: Date;
   updated?: Date;
   noindex?: boolean;
+  editor?: boolean;
 }
 
-const { title, description = blog.description, article = false, published, updated, noindex = false } = Astro.props;
+const { title, description = blog.description, article = false, published, updated, noindex = false, editor = false } = Astro.props;
 const pageTitle = title ? `${title} | ${blog.title}` : blog.title;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const policy = `default-src 'none'; script-src ${editor ? "'self'" : "'none'"}; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src ${editor ? 'https://api.github.com' : "'none'"}; frame-src ${editor ? "'self' about:" : "'none'"}; object-src 'none'; base-uri 'none'; form-action 'none'`;
 ---
 <!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
+    {import.meta.env.PROD && <meta http-equiv="Content-Security-Policy" content={policy} />}
+    <meta name="referrer" content={editor ? 'no-referrer' : 'strict-origin-when-cross-origin'} />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="author" content={blog.author} />
@@ -41,23 +45,21 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   </head>
   <body>
     <a class="skip-link" href="#main">跳到正文</a>
-    <div class="site-shell">
+    <div class:list={['site-shell', { 'editor-shell': editor }]}>
       <header class="site-header">
         <a class="brand" href={withBase()} aria-label={`${blog.title}首页`}>
-          <span class="brand-mark" aria-hidden="true">w.</span>
           <span>{blog.title}</span>
         </a>
         <nav aria-label="主导航">
-          <a href={withBase()} aria-current={!article && !noindex ? 'page' : undefined}>文章</a>
-          <a href={blog.github}>GitHub <span aria-hidden="true">↗</span></a>
+          <a href={withBase()} aria-current={!article && !noindex && !editor ? 'page' : undefined}>文章</a>
           <a href={withBase('rss.xml')}>RSS</a>
+          <a href={withBase('edit/')} aria-current={editor ? 'page' : undefined}>写作</a>
         </nav>
       </header>
       <main id="main"><slot /></main>
       <footer class="site-footer">
         <span>© {new Date().getFullYear()} {blog.author}</span>
-        <span>保持好奇，慢慢写。</span>
-        <a href={blog.repository}>博客源码 <span aria-hidden="true">↗</span></a>
+        <a href={blog.repository}>GitHub</a>
       </footer>
     </div>
   </body>

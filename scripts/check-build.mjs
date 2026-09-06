@@ -20,9 +20,15 @@ async function exists(path) {
 const files = await walk(root);
 const htmlFiles = files.filter((file) => file.endsWith('.html'));
 assert.ok(htmlFiles.length >= 2, 'Build must include the homepage and 404 page');
-for (const required of ['index.html', '404.html', 'rss.xml', 'sitemap.xml', 'robots.txt', 'favicon.svg']) {
+for (const required of ['index.html', '404.html', 'edit/index.html', 'rss.xml', 'sitemap.xml', 'robots.txt', 'favicon.svg']) {
   assert.ok(await exists(join(root, required)), `Missing build output: ${required}`);
 }
+
+const editorHTML = await readFile(join(root, 'edit/index.html'), 'utf8');
+assert.match(editorHTML, /sandbox=""/, 'Preview must use an opaque, script-free iframe sandbox');
+assert.match(editorHTML, /id="save-post"[^>]*disabled/, 'Saving must be disabled before authorization');
+assert.match(editorHTML, /Content-Security-Policy/, 'Editor requires a content security policy');
+assert.match(editorHTML, /name="robots" content="noindex"/, 'Editor should not be indexed');
 
 for (const file of htmlFiles) {
   const html = await readFile(file, 'utf8');

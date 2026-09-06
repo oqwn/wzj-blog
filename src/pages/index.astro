@@ -1,40 +1,33 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getPosts, formatDate, readingMinutes } from '../lib/posts';
+import { getPosts } from '../lib/posts';
 import { postPath } from '../lib/paths';
+import { blog } from '../config';
 
 const posts = await getPosts();
 ---
 <BaseLayout>
-  <section class="intro" aria-labelledby="intro-title">
-    <div>
-      <p class="intro-kicker">技术、思考与日常</p>
-      <h1 id="intro-title">把问题想明白，<br />把过程记下来。</h1>
-    </div>
-    <p class="intro-description">这里是 WZJ 的个人博客。<br />记录写代码时的探索，<br />也留下一些还在生长的想法。</p>
-  </section>
+  <p class="site-description">{blog.description}</p>
 
   <section class="writing" aria-labelledby="writing-title">
     <div class="section-heading">
-      <h2 id="writing-title">文章</h2>
-      <span>{posts.length} 篇记录</span>
+      <h1 id="writing-title">文章</h1>
+      <span>{posts.length} 篇</span>
     </div>
     {posts.length === 0 ? (
-      <p class="empty-state">第一篇文章还在酝酿，欢迎过些日子再来。</p>
+      <p class="empty-state">暂无文章。</p>
     ) : (
       <ol class="post-list">
         {posts.map((post) => (
           <li class="post-row">
-            <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+            <time datetime={post.data.date.toISOString()}>{post.data.date.toISOString().slice(0, 10)}</time>
             <article>
-              <h3><a href={postPath(post.id)}>{post.data.title}</a></h3>
+              <h2><a href={postPath(post.id)}>{post.data.title}</a></h2>
               {post.data.description && <p>{post.data.description}</p>}
               <div class="post-meta">
                 <ul class="tags" aria-label="文章标签">{post.data.tags.map((tag) => <li>{tag}</li>)}</ul>
-                <span>约 {readingMinutes(post.body)} 分钟</span>
               </div>
             </article>
-            <a class="read-post" href={postPath(post.id)} aria-label={`阅读：${post.data.title}`}><span aria-hidden="true">↗</span></a>
           </li>
         ))}
       </ol>

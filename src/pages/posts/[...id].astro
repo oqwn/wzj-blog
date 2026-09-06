@@ -16,6 +16,7 @@ interface Props { post: Post; newer?: Post; older?: Post; }
 const { post, newer, older } = Astro.props;
 const { Content, headings } = await render(post);
 const toc = headings.filter(({ depth }) => depth === 2 || depth === 3);
+const sourcePath = post.filePath?.replace(/\\/g, '/').match(/(?:^|\/)(content\/posts\/.+\.md)$/)?.[1];
 ---
 <BaseLayout title={post.data.title} description={post.data.description || post.data.title} article published={post.data.date} updated={post.data.updated}>
   <article>
@@ -28,13 +29,14 @@ const toc = headings.filter(({ depth }) => depth === 2 || depth === 3);
         <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
         <span>约 {readingMinutes(post.body)} 分钟阅读</span>
         {post.data.updated && <span>更新于 <time datetime={post.data.updated.toISOString()}>{formatDate(post.data.updated)}</time></span>}
+        {sourcePath && <a href={`${withBase('edit/')}?file=${encodeURIComponent(sourcePath)}`}>编辑</a>}
       </div>
     </header>
     <div class="article-grid">
       <div class="prose"><Content /></div>
       {toc.length > 1 && (
         <aside class="toc" aria-label="文章目录">
-          <details open>
+          <details>
             <summary>本篇目录</summary>
             <ol>{toc.map((heading) => (
               <li class:list={{ 'toc-subheading': heading.depth === 3 }}>
