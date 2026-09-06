@@ -45,7 +45,9 @@ try {
       await image.evaluate((element) => element.decode());
     }
     await page.evaluate(() => document.fonts.ready);
-    assert.equal(await page.locator('script').count(), 0);
+    assert.equal(await page.locator('script').count(), 1);
+    assert.equal(await page.locator('.prose script').count(), 0);
+    assert.equal(await page.locator('.code-copy:visible').count(), 0, 'No inactive copy controls when JavaScript is disabled');
     assert.equal(await page.locator('.prose .diagram img[id^="mermaid-"]').count(), 3);
     assert.equal(await page.locator('.prose img[alt^="draw.io"]').count(), 1);
     assert.equal(await page.locator('.prose .katex-display').count(), 1);
@@ -56,7 +58,7 @@ try {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${width}px: page overflows horizontally`);
     assert.ok(await page.locator('.prose pre[data-language="typescript"]').textContent().then((text) => text.includes('<script>')));
     const codeBlock = page.locator('.prose .code-block').filter({ has: page.locator('pre[data-language="typescript"]') });
-    assert.equal(await codeBlock.locator('.code-header').textContent(), 'TypeScript');
+    assert.equal(await codeBlock.locator('.code-language').textContent(), 'TypeScript');
     assert.equal(await codeBlock.locator('pre').evaluate((pre) => getComputedStyle(pre).backgroundColor), 'rgb(30, 31, 34)');
     const sourceText = await codeBlock.locator('code').textContent();
     assert.equal(await codeBlock.locator('.line-number').count(), sourceText.split('\n').length);
@@ -87,7 +89,7 @@ try {
     assert.equal(await diagramSource.locator('pre').isVisible(), false);
     await diagramSource.locator('summary').click();
     assert.equal(await diagramSource.locator('pre').isVisible(), true);
-    assert.equal(await diagramSource.locator('.code-header').textContent(), 'Mermaid');
+    assert.equal(await diagramSource.locator('.code-language').textContent(), 'Mermaid');
     assert.ok((await diagramSource.locator('pre').textContent()).startsWith('flowchart LR'));
     const details = page.locator('.prose details:not(.diagram-source)');
     await details.locator('summary').click();
@@ -110,6 +112,55 @@ try {
     if (process.env.SCREENSHOT_DIR && width === 390) await codeBlock.screenshot({ path: join(resolve(process.env.SCREENSHOT_DIR), 'code-mobile.png') });
     console.log(`Rendered at ${width}px with JavaScript disabled: diagrams, images, math, tables, code, details, footnotes and page width verified.`);
   }
+  const copyContext = await browser.newContext({ permissions: ['clipboard-read', 'clipboard-write'], reducedMotion: 'reduce' });
+  const copyPage = await copyContext.newPage();
+  copyPage.on('pageerror', (error) => failures.push(error.message));
+  await copyPage.goto(url, { waitUntil: 'networkidle' });
+  await copyPage.waitForSelector('.code-copy:not([hidden])');
+  await copyPage.locator('.prose details').evaluateAll((details) => details.forEach((element) => { element.open = true; }));
+  const blocks = await copyPage.locator('.prose .code-block').all();
+  for (const [index, block] of blocks.entries()) {
+    const expected = await block.locator('pre code').textContent();
+    const button = block.locator('.code-copy');
+    if (index === 0) { await button.focus(); await button.press('Enter'); }
+    else await button.click();
+    await copyPage.waitForFunction((button) => button.dataset.state === 'copied', await button.elementHandle());
+    assert.equal(await copyPage.evaluate(() => navigator.clipboard.readText()), expected, 'One-click copy must preserve complete source, whitespace and special characters');
+    assert.equal(await button.locator('.copy-label').textContent(), '已复制');
+  }
+  const firstBlock = copyPage.locator('.code-block').first();
+  const copyButton = firstBlock.locator('.code-copy');
+  const expected = await firstBlock.locator('pre code').textContent();
+  // If the modern API is denied, exercise the real browser selection-copy fallback.
+  await copyPage.evaluate(() => {
+    Object.defineProperty(navigator.clipboard, 'writeText', { configurable: true, value: () => Promise.reject(new DOMException('Denied', 'NotAllowedError')) });
+  });
+  await copyButton.click();
+  await copyPage.waitForFunction((button) => button.dataset.state === 'copied', await copyButton.elementHandle());
+  assert.equal(await copyPage.evaluate(() => navigator.clipboard.readText()), expected);
+  // Both mechanisms denied: select the source and report failure instead of false success.
+  await copyPage.evaluate(() => { document.execCommand = () => false; });
+  await copyButton.click();
+  await copyPage.waitForFunction((button) => button.dataset.state === 'manual', await copyButton.elementHandle());
+  assert.equal(await copyPage.evaluate(() => window.getSelection().toString()), expected);
+  assert.match(await firstBlock.locator('.copy-status').textContent(), /自动复制未成功/);
+  assert.equal(await copyPage.locator('textarea').count(), 0);
+  // Reload restores the real API and verifies retry, button reset, and mobile touch-sized controls.
+  await copyPage.reload({ waitUntil: 'networkidle' });
+  for (const width of [1440, 390, 320]) {
+    await copyPage.setViewportSize({ width, height: 960 });
+    await copyButton.click();
+    await copyPage.waitForFunction((button) => button.dataset.state === 'copied', await copyButton.elementHandle());
+    assert.equal(await copyPage.evaluate(() => navigator.clipboard.readText()), expected);
+    assert.ok(await copyPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+    if (process.env.SCREENSHOT_DIR && width !== 320) {
+      await firstBlock.screenshot({ path: join(resolve(process.env.SCREENSHOT_DIR), `copy-code-${width}.png`) });
+    }
+  }
+  await copyPage.waitForFunction((button) => button.textContent.trim() === '复制', await copyButton.elementHandle());
+  assert.equal(await firstBlock.locator('.copy-status').textContent(), '');
+  await copyContext.close();
+  console.log(`Verified one-click clipboard contents for ${blocks.length} code blocks, keyboard activation, selection fallback, honest failure, reset and mobile layout.`);
   assert.deepEqual(failures, []);
 } finally {
   await browser?.close();

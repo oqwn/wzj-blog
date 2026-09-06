@@ -145,7 +145,7 @@ git push origin main
 [第一篇文章](../hello-world/)
 ```
 
-标题会生成可展开的文章目录。围栏代码块标注语言后，发布页面会显示语言标签、行号和接近 IDEA 的深色语法高亮；`ts`、`py` 等常见缩写也支持。未指定或无法识别的语言按纯文本显示。行号不会进入复制内容，长代码在框内横向滚动。代码样式配置在 `src/lib/code-blocks.mjs`。支持列表、引用、表格和任务列表。Pages CMS 的排版视图用于写作，代码高亮等细节以正式页面为准。
+标题会生成可展开的文章目录。围栏代码块标注语言后，发布页面会显示语言标签、行号和接近 IDEA 的深色语法高亮；`ts`、`py` 等常见缩写也支持。未指定或无法识别的语言按纯文本显示。右上角“复制”可复制完整源码并显示反馈，保留换行和缩进，不带行号；展开后的 Mermaid 源码同样支持。自动复制不可用时会选中源码并提示手动复制。长代码在框内横向滚动。代码样式配置在 `src/lib/code-blocks.mjs`。支持列表、引用、表格和任务列表。Pages CMS 的排版视图用于写作，代码高亮等细节以正式页面为准。
 
 ## Mermaid、draw.io 与数学公式
 
@@ -168,7 +168,7 @@ draw.io 先导出 SVG 或 PNG，再像普通图片一样引用。原始 `.drawio
 
 公式使用 `$a^2+b^2=c^2$`（行内）或独占行的 `$$` 包住公式（独立公式）。支持 KaTeX 语法；公式样式和字体一起打包，不使用外部 CDN。显示美元金额时可以转义为 `\$19.99`。
 
-本项目使用 Astro 7 的 `unified` Markdown 处理器，配置在 `src/lib/markdown.mjs`。网页后台编辑含 Mermaid、公式或复杂 HTML 的文章时，使用 **Source** 模式；后台的 Editor 模式不保证与博客的扩展兼容。MDX、Obsidian 双链、`:::note` 等私有语法尚未接入；代码块不执行，页面禁止脚本和 iframe。
+本项目使用 Astro 7 的 `unified` Markdown 处理器，配置在 `src/lib/markdown.mjs`。网页后台编辑含 Mermaid、公式或复杂 HTML 的文章时，使用 **Source** 模式；后台的 Editor 模式不保证与博客的扩展兼容。MDX、Obsidian 双链、`:::note` 等私有语法尚未接入；代码块不执行，页面禁止文章脚本和 iframe。CSP 仅按 SHA-256 内容哈希放行本站的复制脚本，不开放任意脚本或 API 请求。关闭 JavaScript 时复制按钮隐藏，文章、图表和手动选择复制仍可正常使用。
 
 `npm run verify` 会检查有效与无效 Mermaid、特殊字符、公式和 GFM，并用禁用 JavaScript 的浏览器在 1440、390、320px 宽度下检查测试文章。可以单独运行 `npm run test:render`；设置 `SCREENSHOT_DIR=/tmp/blog-rendering` 可保存图表截图。删除测试文章后，浏览器样本检查会跳过，独立的 Markdown 回归测试仍会运行。
 

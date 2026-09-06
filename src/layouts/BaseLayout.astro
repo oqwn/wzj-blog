@@ -3,6 +3,7 @@ import { blog } from '../config';
 import { withBase } from '../lib/paths';
 import '../styles/global.css';
 import 'katex/dist/katex.min.css';
+import copyCodeScript from '../scripts/copy-code.js?raw';
 
 interface Props {
   title?: string;
@@ -16,7 +17,10 @@ interface Props {
 const { title, description = blog.description, article = false, published, updated, noindex = false } = Astro.props;
 const pageTitle = title ? `${title} | ${blog.title}` : blog.title;
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const policy = "default-src 'none'; script-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
+const scriptDigest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(copyCodeScript));
+const scriptHash = btoa(String.fromCharCode(...new Uint8Array(scriptDigest)));
+const scriptSource = article ? `'sha256-${scriptHash}'` : "'none'";
+const policy = `default-src 'none'; script-src ${scriptSource}; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'`;
 ---
 <!doctype html>
 <html lang="zh-CN">
@@ -66,5 +70,6 @@ const policy = "default-src 'none'; script-src 'none'; style-src 'self' 'unsafe-
         <a href={blog.repository}>GitHub</a>
       </footer>
     </div>
+    {article && <script is:inline set:html={copyCodeScript} />}
   </body>
 </html>

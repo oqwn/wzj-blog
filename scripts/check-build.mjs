@@ -2,11 +2,14 @@ import { readdir, readFile, stat } from 'node:fs/promises';
 import { resolve, relative, join } from 'node:path';
 import assert from 'node:assert/strict';
 import { parse } from 'yaml';
+import { createHash } from 'node:crypto';
 
 const root = resolve(process.env.BUILD_DIR || 'dist');
 const origin = new URL(process.env.SITE_URL || 'https://oqwn.github.io').origin;
 const base = `/${(process.env.BASE_PATH ?? '/wzj-blog').replace(/^\/+|\/+$/g, '')}`.replace(/\/$/, '');
 const errors = [];
+const copyCodeScript = await readFile('src/scripts/copy-code.js', 'utf8');
+const copyCodeHash = createHash('sha256').update(copyCodeScript).digest('base64');
 
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -38,9 +41,17 @@ assert.equal(collection?.fields.find((field) => field.name === 'draft')?.default
 for (const file of htmlFiles) {
   const html = await readFile(file, 'utf8');
   const name = relative(root, file);
-  assert.doesNotMatch(html, /<script\b|<input\b[^>]*type="password"/i, `${name}: public pages must not handle GitHub credentials`);
+  assert.doesNotMatch(html, /<input\b[^>]*type="password"/i, `${name}: public pages must not handle GitHub credentials`);
+  const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
+  assert.ok(scripts.length <= 1, `${name}: only the copy-code script may run`);
+  for (const [, attributes, body] of scripts) {
+    assert.doesNotMatch(attributes, /\bsrc\s*=/i, `${name}: scripts must not load external code`);
+    assert.equal(body, copyCodeScript, `${name}: script must be the reviewed copy-code source`);
+  }
   assert.doesNotMatch(html, /class="[^"]*katex-error/, `${name}: invalid math must be fixed before publishing`);
-  assert.match(html, /script-src (?:'|&#39;|&#x27;)none(?:'|&#39;|&#x27;)/, `${name}: public pages must prohibit scripts`);
+  const policy = html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1]?.replace(/&#39;|&#x27;/g, "'");
+  assert.ok(policy?.includes(`script-src ${scripts.length ? `'sha256-${copyCodeHash}'` : "'none'"};`), `${name}: CSP must only allow the copy-code script hash`);
+  assert.ok(policy?.includes("script-src-attr 'none';"), `${name}: inline event handlers must be prohibited`);
   assert.match(html, /connect-src (?:'|&#39;|&#x27;)none(?:'|&#39;|&#x27;)/, `${name}: public pages must prohibit API requests`);
   const route = name === 'index.html' ? '/' : `/${name.replace(/index\.html$/, '')}`;
   const page = new URL(`${base}${route}`, origin);

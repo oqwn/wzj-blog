@@ -16,7 +16,14 @@
 .prose pre { max-width: 100%; padding: 16px 18px; border: 1px solid var(--line); border-radius: 7px; overflow-x: auto; line-height: 1.7; }
 .prose pre code { padding: 0; background: none; }
 .prose .code-block { margin: 1em 0; overflow: hidden; border: 1px solid #3c3f45; border-radius: 7px; background: #1e1f22; color: #bcbec4; }
-.prose .code-header { padding: 8px 16px; border-bottom: 1px solid #3c3f45; background: #2b2d30; color: #d6d8de; font-size: 12px; font-weight: 500; line-height: 1.5; }
+.prose .code-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; padding: 4px 10px 4px 16px; border-bottom: 1px solid #3c3f45; background: #2b2d30; color: #d6d8de; font-size: 12px; font-weight: 500; line-height: 1.5; }
+.prose .code-copy { display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: none; min-width: 76px; min-height: 30px; padding: 4px 8px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: #bcbec4; font: inherit; cursor: pointer; }
+.prose .code-copy[hidden] { display: none; }
+.prose .code-copy:hover { background: #383b40; border-color: #51555d; color: #fff; }
+.prose .code-copy:focus-visible { outline: 2px solid #93b8aa; outline-offset: -2px; }
+.prose .code-copy:disabled { cursor: wait; }
+.prose .code-copy[data-state='copied'] { color: #9bccaa; }
+.prose .code-copy[data-state='manual'] { color: #e2bf87; }
 .prose .code-block pre { margin: 0; padding: 14px 0; border: 0; border-radius: 0; line-height: 1.8; tab-size: 4; }
 .prose .code-block pre:focus-visible { outline: 2px solid #93b8aa; outline-offset: -2px; }
 .prose .code-block code { display: block; width: max-content; min-width: 100%; font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 13px; }
@@ -53,4 +60,5 @@
   .prose { font-size: 15px; }
   .prose h2 { font-size: 20px; }
   .prose pre { padding: 16px; }
+  .prose .code-copy { min-height: 40px; }
 }

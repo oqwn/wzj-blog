@@ -46,7 +46,28 @@ export function rehypeCodeFrames() {
             type: 'element', tagName: 'div',
             properties: { className: ['code-block'], role: 'group', ariaLabel: `${label} 代码块` },
             children: [
-              { type: 'element', tagName: 'div', properties: { className: ['code-header'] }, children: [{ type: 'text', value: label }] },
+              {
+                type: 'element', tagName: 'div', properties: { className: ['code-header'] },
+                children: [
+                  { type: 'element', tagName: 'span', properties: { className: ['code-language'] }, children: [{ type: 'text', value: label }] },
+                  {
+                    type: 'element', tagName: 'button',
+                    properties: { type: 'button', className: ['code-copy'], hidden: true, ariaLabel: `复制 ${label} 代码` },
+                    children: [
+                      {
+                        type: 'element', tagName: 'svg',
+                        properties: { viewBox: '0 0 16 16', width: 14, height: 14, fill: 'none', stroke: 'currentColor', strokeWidth: 1.2, ariaHidden: 'true' },
+                        children: [
+                          { type: 'element', tagName: 'rect', properties: { x: 5.5, y: 5.5, width: 8, height: 8, rx: 1.5 }, children: [] },
+                          { type: 'element', tagName: 'path', properties: { d: 'M10.5 5.5v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2' }, children: [] },
+                        ],
+                      },
+                      { type: 'element', tagName: 'span', properties: { className: ['copy-label'] }, children: [{ type: 'text', value: '复制' }] },
+                    ],
+                  },
+                  { type: 'element', tagName: 'span', properties: { className: ['copy-status', 'sr-only'], role: 'status', ariaLive: 'polite' }, children: [] },
+                ],
+              },
               child,
             ],
           };

@@ -50,7 +50,7 @@ test('Mermaid flow, sequence and state diagrams become accessible static SVG ima
   assert.doesNotMatch(code, /alt=""|language-mermaid|<script\b/);
   assert.match(code, /alt="从写作到发布"/);
   assert.equal([...code.matchAll(/<details class="diagram-source"/g)].length, 3);
-  assert.equal([...code.matchAll(/class="code-header">Mermaid</g)].length, 3);
+  assert.equal([...code.matchAll(/class="code-language">Mermaid</g)].length, 3);
   assert.match(code, /从写作到发布/);
   assert.match(code, /data-language="mermaid"/);
 });
@@ -62,8 +62,10 @@ test('code frames label language aliases, keep line numbers out of source, and f
     '```', 'unlabelled <tag> & text', '```', '',
     '```made-up-language', 'unknown <tag>', '```',
   ].join('\n'));
-  assert.match(code, /class="code-header">TypeScript<\/div>/);
-  assert.equal([...code.matchAll(/class="code-header">纯文本</g)].length, 2);
+  assert.match(code, /class="code-language">TypeScript<\/span>/);
+  assert.equal([...code.matchAll(/class="code-language">纯文本</g)].length, 2);
+  assert.equal([...code.matchAll(/class="code-copy" hidden/g)].length, 3);
+  assert.match(code, /aria-label="复制 TypeScript 代码"/);
   assert.match(code, /aria-label="TypeScript 源码"/);
   assert.match(code, /class="line-number" data-line="3" aria-hidden="true"><\/span>/);
   assert.match(code, /style="color:#CF8E6D"/i); // keyword
