@@ -22,7 +22,6 @@ a:hover { color: var(--blue); text-decoration: underline; }
 h1, h2, h3, p { margin: 0; }
 img { max-width: 100%; height: auto; }
 .site-shell { max-width: 824px; padding: 0 28px; margin: auto; }
-.site-shell.editor-shell { max-width: 1100px; }
 .site-header { min-height: 74px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--line); }
 .brand { font-size: 17px; font-weight: 600; white-space: nowrap; }
 .site-header nav { display: flex; gap: 22px; font-size: 13px; color: var(--muted); }

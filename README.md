@@ -4,24 +4,30 @@
 
 ## 在网页中写作
 
-打开博客的 **写作** 入口，或文章页上的 **编辑** 链接，即可直接编辑 Markdown 并查看预览。可以新建文章、修改现有文章、下载 Markdown，并保存到 GitHub。名称、日期、标签和 `draft` 在文本顶部修改。
+博客的 **写作** 入口和文章页的 **编辑** 链接会打开 [Pages CMS 写作后台](https://app.pagescms.org/oqwn/wzj-blog/main/collection/posts)。使用 GitHub 登录，无需另建 Cloudflare 账号或手动粘贴个人令牌。后台管理登录会话；退出、会话过期或更换设备时需要重新登录，不保证永久免登录。
 
-保存之前，展开 **连接作者账号 → 首次如何授权**，按提示在 GitHub 创建细粒度令牌：只选择 `wzj-blog` 仓库，赋予 **Contents: Read and write** 权限，设置短期有效期。请把令牌粘贴到博客编辑页，**不要粘贴到文章或聊天里**。每次重新打开编辑页都需要重新连接。
+首次连接：
 
-点击 **保存到 GitHub** 会提交到 `main`，随后由现有 CI 自动发布。`draft: true` 的文章只保存在公开仓库，不会出现在博客列表中。若 GitHub 里的文章已被其他途径修改，保存会报告冲突，不会强行覆盖；先下载当前内容，再重新载入远端文章并合并。
+1. 点击 **Sign in with GitHub**，用作者账号 `oqwn` 登录。
+2. 按提示安装 Pages CMS 的 GitHub App。选择 **Only select repositories**，只勾选 **wzj-blog**。
+3. 打开 `oqwn / wzj-blog` 的 **main** 分支，进入 **文章**。仓库已提供 `.pages.yml`，无需重新编写配置。
 
-网页修改保存后，本地写作前先运行 `git pull --ff-only`，让本地仓库同步最新内容。
+日常写作：
 
-### 编辑权限与安全边界
+- 新建或打开一篇文章，在表单中填写标题、日期、摘要和标签。新文章默认开启 **草稿**。
+- 正文的 **Source** 模式编辑 Markdown，**Editor** 模式查看和编辑排版。新建时可调整文件名，建议使用小写英文和连字符；发布后保持文件名不变，以免旧链接失效。
+- 点击保存会提交 Markdown 到 GitHub。关闭 **草稿** 后保存，现有 CI 自动构建、发布到博客；可在 [Actions](https://github.com/oqwn/wzj-blog/actions/workflows/pages.yml) 查看进度。
+- `draft: true` 不进入博客、RSS 或站点地图，**但源文件仍在公开仓库中可见**。
 
-- 编辑页面可以被访问，但保存需要有效的 GitHub 凭据。界面只接受作者账号 `oqwn`；真正阻止未授权修改的是 GitHub 服务端的仓库权限校验，前端按钮或账号检查不能代替它。
-- 程序不会把令牌写入源码、GitHub 仓库、URL、Cookie、localStorage 或 sessionStorage。令牌仅在当前页面内存中使用，只发送到 `api.github.com`，断开连接或离开页面时清除。清除页面里的令牌**不等于撤销 GitHub 令牌**，可随时在 GitHub 设置中撤销。
-- Markdown 预览使用不允许脚本和同源访问的 iframe 沙箱，原始 HTML 显示为文本。发布后的阅读页面也用内容安全策略禁止脚本、表单和嵌入页面。编辑器使用本地打包的依赖，没有外部脚本 CDN。
-- 编辑器只提供 `content/posts/*.md` 及子目录的读写入口，但令牌的 Contents 权限是**仓库级**，并非目录级。如果令牌泄露，攻击者仍可能修改该仓库的其他普通文件。不要授予所有仓库、管理或工作流权限。
-- 浏览器扩展、设备恶意软件或同域其他网站的恶意脚本仍可能威胁页面中的凭据。GitHub 项目 Pages 共用 `oqwn.github.io` 域名，不是彼此独立的安全来源。仅内存保存不能消除这些风险；有更高安全要求时，建议使用独立域名与具备服务端会话的 GitHub OAuth 后台。
-- 不希望在博客中输入令牌时，可以在站内写作和预览、下载 Markdown，再通过 GitHub 官方网页编辑器或本地 Git 提交。
+正文使用 Markdown 格式保存，可继续在本地修改。网页保存后，本地写作前先运行 `git pull --ff-only`。后台排版视图与博客主题不完全一致，最终阅读效果以发布后的博客为准。图片可以在 Markdown 源码中引用 HTTPS 图片，或继续通过本地 Git 添加；当前未配置 CMS 图片上传目录。
 
-参考：[GitHub 文件写入权限](https://docs.github.com/en/rest/repos/contents#create-or-update-file-contents)、[细粒度令牌管理](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)。
+### 编辑权限
+
+访客能看到「写作」入口，但不会因此获得保存权限。Pages CMS 与 GitHub 检查登录身份和仓库授权；请勿向其他人开放仓库写入权限或邀请 CMS 协作者。配置文件只定义文章编辑表单，不是 GitHub 仓库权限边界。
+
+Pages CMS 是第三方托管服务，安装 GitHub App 相当于授权它访问所选仓库。只授权 `wzj-blog`，可在 [GitHub 已安装的应用](https://github.com/settings/installations) 随时调整或撤销。博客本身不接收或保存登录令牌，旧的个人令牌编辑器已移除；如果之前创建过专用个人令牌，可在 [GitHub 令牌设置](https://github.com/settings/personal-access-tokens) 手动撤销，移除编辑器不会自动撤销令牌。
+
+官方文档：[首次登录与安装](https://pagescms.org/docs/quick-start/)、[权限校验](https://pagescms.org/docs/development/authentication/)、[Markdown 编辑模式](https://pagescms.org/docs/configuration/fields/rich-text/)。
 
 - 博客地址：<https://oqwn.github.io/wzj-blog/>
 - 发布状态：[GitHub Actions](https://github.com/oqwn/wzj-blog/actions/workflows/pages.yml)
@@ -136,11 +142,12 @@ git push origin main
 [第一篇文章](../hello-world/)
 ```
 
-标题会生成可展开的文章目录，围栏代码块标注语言后在发布页面自动高亮。支持列表、引用、表格和任务列表。网页预览展示常见 Markdown 排版，代码高亮等细节以正式页面为准；原始 HTML 在预览中按文本展示。
+标题会生成可展开的文章目录，围栏代码块标注语言后在发布页面自动高亮。支持列表、引用、表格和任务列表。Pages CMS 的排版视图用于写作，代码高亮等细节以正式页面为准。
 
 ## 修改个人信息与外观
 
-- `src/config.ts`：博客名称、作者、介绍、GitHub 地址。
+- `src/config.ts`：博客名称、作者、介绍、GitHub 地址和写作后台链接。
+- `.pages.yml`：Pages CMS 的文章字段、Markdown 编辑模式和草稿默认值。
 - `src/pages/index.astro`：首页介绍。
 - `src/styles/global.css`：颜色、布局、导航及响应式样式。
 - `src/styles/prose.css`：正文、代码、表格等阅读样式。

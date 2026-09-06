@@ -8,7 +8,8 @@ const posts = defineCollection({
     title: z.string().min(1),
     description: z.string().default(''),
     date: z.coerce.date(),
-    updated: z.coerce.date().optional(),
+    // Pages CMS writes an empty string when the optional date is cleared.
+    updated: z.preprocess((value) => value === '' || value === null ? undefined : value, z.coerce.date().optional()),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
   }),

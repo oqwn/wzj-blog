@@ -1,69 +1,36 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { blog } from '../config';
-import '../styles/editor.css';
-
-const tokenURL = 'https://github.com/settings/personal-access-tokens/new?name=Blog%20editor&description=Edit%20oqwn%2Fwzj-blog%20articles&target_name=oqwn&contents=write&expires_in=7';
 ---
-<BaseLayout title="写作" editor noindex>
-  <div class="editor-page" id="editor-app">
-    <div class="editor-heading">
-      <h1>写作</h1>
-      <span id="connection-status">未连接 GitHub</span>
-      <button id="disconnect" type="button" hidden>断开连接</button>
-    </div>
-    <details class="connection" id="connection" open>
-      <summary>连接作者账号</summary>
-      <p>仅账号 <strong>oqwn</strong> 可保存。令牌只在当前页面使用，关闭后需重新连接。</p>
-      <form id="connect-form" autocomplete="off">
-        <label for="github-token">GitHub 写入令牌</label>
-        <div class="connect-row">
-          <input id="github-token" type="password" autocomplete="off" spellcheck="false" placeholder="粘贴仅限本仓库的令牌" required />
-          <button id="connect-button" type="submit">连接 GitHub</button>
-        </div>
-      </form>
-      <details class="token-help">
-        <summary>首次如何授权</summary>
-        <ol>
-          <li>在 GitHub <a href={tokenURL} target="_blank" rel="noopener noreferrer">创建细粒度令牌</a>。</li>
-          <li>Repository access 选择 <strong>Only select repositories</strong>，只勾选 <strong>wzj-blog</strong>。</li>
-          <li>Contents 设为 <strong>Read and write</strong>，设置短期有效期，生成后粘贴到上方。</li>
-        </ol>
-        <p>令牌相当于钥匙，请勿写进文章或发给他人。可随时在 GitHub 撤销授权。此编辑器不会请求修改工作流的权限。</p>
-      </details>
+<BaseLayout title="写作" description="用 GitHub 登录写作后台，编辑 Markdown 并发布文章。" noindex>
+  <section class="writing">
+    <h1>写作</h1>
+    <p>用 GitHub 登录 Pages CMS，编辑 Markdown，保存后自动发布。</p>
+    <a class="write-link" href={blog.editor} rel="noreferrer">进入写作后台 ↗</a>
+    <details>
+      <summary>首次使用</summary>
+      <ol>
+        <li>选择 <strong>Sign in with GitHub</strong>，使用作者账号 <strong>oqwn</strong> 登录。</li>
+        <li>安装 Pages CMS 的 GitHub App，选择 <strong>Only select repositories → wzj-blog</strong>。</li>
+        <li>打开 <strong>main → 文章</strong>。正文可切换 <strong>Source</strong> 和 <strong>Editor</strong>；关闭「草稿」后保存即可发布。</li>
+      </ol>
+      <p>无需手动输入令牌。登录过期时重新登录即可；访客打开此入口不会获得写入权限。</p>
     </details>
-    <div class="file-toolbar">
-      <label for="post-select">文章</label>
-      <select id="post-select"><option value="">新文章</option></select>
-      <button id="new-post" type="button">新建</button>
-      <button id="reload-post" type="button" disabled>重新载入</button>
-    </div>
-    <div class="file-name-row">
-      <label for="post-name">文件名</label>
-      <input id="post-name" placeholder="learning-notes" autocomplete="off" spellcheck="false" aria-describedby="file-location" />
-      <span id="file-location">.md</span>
-    </div>
-    <p class="editor-hint">修改顶部的标题、日期和 draft，再写正文。draft: true 的文章只保存到公开仓库。</p>
-    <div class="editor-panels">
-      <div class="source-panel">
-        <label for="markdown-source">Markdown</label>
-        <textarea id="markdown-source" spellcheck="false" aria-describedby="editor-status"></textarea>
-      </div>
-      <div class="preview-panel">
-        <span id="preview-label">预览</span>
-        <iframe id="markdown-preview" title="Markdown 文章预览" sandbox="" referrerpolicy="no-referrer"></iframe>
-      </div>
-    </div>
-    <div class="save-toolbar">
-      <button id="save-post" type="button" disabled>保存到 GitHub</button>
-      <button id="download-post" type="button">下载 Markdown</button>
-      <a id="deploy-status" href={`${blog.repository}/actions/workflows/pages.yml`} target="_blank" rel="noopener noreferrer" hidden>查看发布进度</a>
-    </div>
-    <p id="editor-status" role="status" aria-live="polite">可先编辑和预览；保存需要连接 GitHub。</p>
-    <noscript>写作页面需要启用 JavaScript。也可以在 GitHub 的网页编辑器中修改文章。</noscript>
-  </div>
+    <p class="writing-note">草稿不显示在博客中，但源文件仍在公开仓库中可见。</p>
+    <a class="deploy-link" href={`${blog.repository}/actions/workflows/pages.yml`}>查看发布进度</a>
+  </section>
 </BaseLayout>
 
-<script>
-  import '../scripts/editor';
-</script>
+<style>
+  .writing { padding-top: 26px; }
+  h1 { font-size: 20px; font-weight: 600; margin-bottom: 10px; }
+  p { color: var(--muted); }
+  .write-link { display: inline-block; margin: 20px 0 24px; padding: 8px 15px; border-radius: 5px; background: var(--ink); color: var(--paper); font-weight: 500; }
+  .write-link:hover { background: var(--blue); text-decoration: none; }
+  details { border-top: 1px solid var(--line); padding-top: 16px; font-size: 13px; }
+  summary { cursor: pointer; width: fit-content; }
+  ol { padding-left: 22px; margin: 12px 0; }
+  li { margin: 8px 0; }
+  .writing-note { margin-top: 20px; font-size: 12px; }
+  .deploy-link { display: inline-block; margin-top: 8px; font-size: 12px; color: var(--blue); }
+</style>

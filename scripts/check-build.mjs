@@ -1,6 +1,7 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { resolve, relative, join } from 'node:path';
 import assert from 'node:assert/strict';
+import { parse } from 'yaml';
 
 const root = resolve(process.env.BUILD_DIR || 'dist');
 const origin = new URL(process.env.SITE_URL || 'https://oqwn.github.io').origin;
@@ -25,14 +26,21 @@ for (const required of ['index.html', '404.html', 'edit/index.html', 'rss.xml', 
 }
 
 const editorHTML = await readFile(join(root, 'edit/index.html'), 'utf8');
-assert.match(editorHTML, /sandbox=""/, 'Preview must use an opaque, script-free iframe sandbox');
-assert.match(editorHTML, /id="save-post"[^>]*disabled/, 'Saving must be disabled before authorization');
-assert.match(editorHTML, /Content-Security-Policy/, 'Editor requires a content security policy');
+assert.match(editorHTML, /href="https:\/\/app\.pagescms\.org\/oqwn\/wzj-blog\/main\/collection\/posts"/, 'Writing must link to the configured CMS collection');
 assert.match(editorHTML, /name="robots" content="noindex"/, 'Editor should not be indexed');
+
+const cms = parse(await readFile('.pages.yml', 'utf8'));
+const collection = cms.content.find((entry) => entry.name === 'posts');
+assert.equal(collection?.path, 'content/posts', 'CMS must edit the Astro article directory');
+assert.equal(collection?.format, 'yaml-frontmatter', 'CMS must keep Markdown with YAML frontmatter');
+assert.equal(collection?.fields.find((field) => field.name === 'draft')?.default, true, 'New CMS articles must begin as drafts');
 
 for (const file of htmlFiles) {
   const html = await readFile(file, 'utf8');
   const name = relative(root, file);
+  assert.doesNotMatch(html, /<script\b|<input\b[^>]*type="password"/i, `${name}: public pages must not handle GitHub credentials`);
+  assert.match(html, /script-src (?:'|&#39;|&#x27;)none(?:'|&#39;|&#x27;)/, `${name}: public pages must prohibit scripts`);
+  assert.match(html, /connect-src (?:'|&#39;|&#x27;)none(?:'|&#39;|&#x27;)/, `${name}: public pages must prohibit API requests`);
   const route = name === 'index.html' ? '/' : `/${name.replace(/index\.html$/, '')}`;
   const page = new URL(`${base}${route}`, origin);
   for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
@@ -70,11 +78,14 @@ const contentRoot = resolve('content/posts');
 for (const file of (await walk(contentRoot)).filter((file) => file.endsWith('.md'))) {
   const content = await readFile(file, 'utf8');
   const frontmatter = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  if (!frontmatter || !/^draft:\s*true\s*$/m.test(frontmatter[1])) continue;
-  const title = frontmatter[1].match(/^title:\s*"(.+)"\s*$/m)?.[1];
-  if (!title) continue;
+  if (!frontmatter) continue;
+  const data = parse(frontmatter[1]);
+  if (data?.draft !== true || typeof data.title !== 'string' || !data.title) continue;
+  const title = data.title;
+  const escapedTitle = title.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
   for (const output of [...htmlFiles, join(root, 'rss.xml'), join(root, 'sitemap.xml')]) {
-    if ((await readFile(output, 'utf8')).includes(title)) errors.push(`${relative(root, output)}: draft title leaked: ${title}`);
+    const text = await readFile(output, 'utf8');
+    if (text.includes(title) || text.includes(escapedTitle)) errors.push(`${relative(root, output)}: draft title leaked: ${title}`);
   }
 }
 

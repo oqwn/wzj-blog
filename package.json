@@ -18,7 +18,6 @@
   "dependencies": {
     "@astrojs/rss": "4.0.19",
     "astro": "7.3.1",
-    "marked": "18.0.11",
     "yaml": "2.9.0"
   },
   "devDependencies": {

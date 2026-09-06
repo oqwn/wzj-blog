@@ -1,0 +1,61 @@
+# Pages CMS hosted editor: https://app.pagescms.org/oqwn/wzj-blog/main/collection/posts
+content:
+  - name: posts
+    label: 文章
+    type: collection
+    path: content/posts
+    format: yaml-frontmatter
+    subfolders: true
+    filename:
+      template: "{year}-{month}-{day}-{primary}.md"
+      field: create
+    view:
+      fields: [title, date, draft]
+      primary: title
+      sort: [date, title]
+      search: [title, description]
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: title
+        label: 标题
+        type: string
+        required: true
+      - name: description
+        label: 摘要
+        type: text
+        default: ""
+      - name: date
+        label: 发布日期
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: updated
+        label: 更新日期
+        type: date
+        default: ""
+        options:
+          format: yyyy-MM-dd
+      - name: tags
+        label: 标签
+        type: string
+        list: true
+        default: []
+      - name: draft
+        label: 草稿
+        type: boolean
+        default: true
+        description: 关闭后保存，即发布到博客。草稿源文件仍在公开仓库中可见。
+      - name: body
+        label: 正文
+        type: rich-text
+        options:
+          format: markdown
+          switcher: true
+          media: false
+
+settings:
+  content:
+    merge: true

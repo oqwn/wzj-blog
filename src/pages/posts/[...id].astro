@@ -3,6 +3,7 @@ import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getPosts, formatDate, readingMinutes, type Post } from '../../lib/posts';
 import { withBase, postPath } from '../../lib/paths';
+import { blog } from '../../config';
 
 export async function getStaticPaths() {
   const posts = await getPosts();
@@ -29,7 +30,7 @@ const sourcePath = post.filePath?.replace(/\\/g, '/').match(/(?:^|\/)(content\/p
         <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
         <span>约 {readingMinutes(post.body)} 分钟阅读</span>
         {post.data.updated && <span>更新于 <time datetime={post.data.updated.toISOString()}>{formatDate(post.data.updated)}</time></span>}
-        {sourcePath && <a href={`${withBase('edit/')}?file=${encodeURIComponent(sourcePath)}`}>编辑</a>}
+        {sourcePath && <a href={`${blog.editor}/edit/${encodeURIComponent(sourcePath)}`} rel="noreferrer">编辑</a>}
       </div>
     </header>
     <div class="article-grid">
