@@ -26,7 +26,7 @@ img { max-width: 100%; height: auto; }
 .site-header { min-height: 82px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--line); }
 .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; white-space: nowrap; }
 .brand:hover { text-decoration: none; }
-.brand-mark { display: grid; place-items: center; width: 30px; height: 32px; border-radius: 7px 7px 3px 7px; background: var(--accent); color: var(--paper); font-size: 19px; font-weight: 500; }
+.brand-mark { display: block; flex: none; width: 28px; height: 28px; }
 .site-header nav { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
 .site-header nav a { display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; border-radius: 5px; white-space: nowrap; }
 .site-header nav a:hover { background: var(--accent-wash); color: var(--accent); text-decoration: none; }
@@ -77,7 +77,7 @@ img { max-width: 100%; height: auto; }
   .site-shell { padding: 0 18px; }
   .site-header { min-height: 72px; gap: 12px; flex-wrap: wrap; padding: 16px 0; }
   .brand { font-size: 16px; }
-  .brand-mark { width: 26px; height: 28px; font-size: 17px; }
+  .brand-mark { width: 24px; height: 24px; }
   .site-header nav { gap: 3px; font-size: 12px; }
   .site-header nav a { padding: 4px 6px; }
   .writing-link svg { display: none; }

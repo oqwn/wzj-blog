@@ -30,7 +30,7 @@ const policy = "default-src 'none'; script-src 'none'; style-src 'self' 'unsafe-
     <meta name="generator" content={Astro.generator} />
     {noindex && <meta name="robots" content="noindex" />}
     {!noindex && <link rel="canonical" href={canonical} />}
-    <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
+    <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg?v=notebook')} />
     <link rel="alternate" type="application/rss+xml" title={blog.title} href={withBase('rss.xml')} />
     <meta property="og:type" content={article ? 'article' : 'website'} />
     <meta property="og:title" content={pageTitle} />
@@ -47,7 +47,7 @@ const policy = "default-src 'none'; script-src 'none'; style-src 'self' 'unsafe-
     <div class="site-shell">
       <header class="site-header">
         <a class="brand" href={withBase()} aria-label={`${blog.title}首页`}>
-          <span class="brand-mark" aria-hidden="true">温</span>
+          <img class="brand-mark" src={withBase('favicon.svg?v=notebook')} width="28" height="28" alt="" aria-hidden="true" />
           <span>{blog.title}</span>
         </a>
         <nav aria-label="主导航">
