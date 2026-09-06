@@ -38,15 +38,13 @@ img { max-width: 100%; height: auto; }
 .section-heading h1 { font-size: 15px; font-weight: 600; }
 .section-heading > span { color: var(--muted); font-size: 11px; border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; }
 .post-list { list-style: none; padding: 0; margin: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
-.post-row { display: grid; grid-template-columns: 78px minmax(0, 1fr); align-items: start; gap: 22px; padding: 20px; }
+.post-row { padding: 20px; }
 .post-row + .post-row { border-top: 1px solid var(--line); }
 .post-row:focus-within { background: var(--wash); }
-.post-date { display: flex; flex-direction: column; color: var(--muted); padding: 3px 18px 3px 0; margin-top: 2px; border-right: 1px solid var(--line); font-variant-numeric: tabular-nums; line-height: 1.5; }
-.post-year { font-size: 11px; }
-.post-day { color: var(--accent); font-size: 19px; font-weight: 500; }
+.post-date { color: var(--muted); font-size: 12px; white-space: nowrap; }
 .post-row h2 { font-size: 17px; line-height: 1.6; font-weight: 600; overflow-wrap: anywhere; }
 .post-row article > p { margin-top: 5px; color: var(--muted); font-size: 13px; }
-.post-meta { margin-top: 7px; color: var(--muted); font-size: 12px; }
+.post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 9px; color: var(--muted); font-size: 12px; }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 0; list-style: none; }
 .tags:empty { display: none; }
 .tags li { color: #3c6b5d; background: var(--accent-wash); border-radius: 4px; padding: 1px 7px; font-size: 11px; }
@@ -82,10 +80,8 @@ img { max-width: 100%; height: auto; }
   .site-header nav a { padding: 4px 6px; }
   .writing-link svg { display: none; }
   .site-description { margin: 18px 0 24px; font-size: 13px; }
-  .post-row { grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 16px; }
+  .post-row { padding: 16px; }
   .post-row h2 { font-size: 16px; }
-  .post-date { flex-direction: row; align-items: baseline; gap: 7px; padding: 0; margin: 0; border: 0; }
-  .post-day { font-size: 12px; }
   .article-header h1 { font-size: 23px; }
   .article-grid { padding: 18px 16px; }
 }

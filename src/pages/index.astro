@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getPosts } from '../lib/posts';
+import { getPosts, formatDate } from '../lib/posts';
 import { postPath } from '../lib/paths';
 import { blog } from '../config';
 
@@ -20,14 +20,11 @@ const posts = await getPosts();
       <ol class="post-list">
         {posts.map((post) => (
           <li class="post-row">
-            <time class="post-date" datetime={post.data.date.toISOString()}>
-              <span class="post-year">{post.data.date.toISOString().slice(0, 4)}</span>
-              <span class="post-day">{post.data.date.toISOString().slice(5, 10).replace('-', '.')}</span>
-            </time>
             <article>
               <h2><a href={postPath(post.id)}>{post.data.title}</a></h2>
               {post.data.description && <p>{post.data.description}</p>}
               <div class="post-meta">
+                <time class="post-date" datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
                 <ul class="tags" aria-label="文章标签">{post.data.tags.map((tag) => <li>{tag}</li>)}</ul>
               </div>
             </article>
