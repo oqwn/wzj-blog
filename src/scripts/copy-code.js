@@ -1,5 +1,5 @@
 (() => {
-  const text = document.documentElement.lang.startsWith('en')
+  const labels = document.documentElement.lang.startsWith('en')
     ? { copy: 'Copy', copied: 'Copied', manual: 'Copy manually', copiedStatus: 'Source copied to clipboard', manualStatus: 'Automatic copy failed. The source is selected; copy it manually.' }
     : { copy: '复制', copied: '已复制', manual: '手动复制', copiedStatus: '源码已复制到剪贴板', manualStatus: '自动复制未成功，已选中源码，请手动复制。' };
 
@@ -55,8 +55,8 @@
       if (!copied) copied = copyWithSelection(text);
       button.disabled = false;
       button.dataset.state = copied ? 'copied' : 'manual';
-      label.textContent = copied ? text.copied : text.manual;
-      status.textContent = copied ? text.copiedStatus : text.manualStatus;
+      label.textContent = copied ? labels.copied : labels.manual;
+      status.textContent = copied ? labels.copiedStatus : labels.manualStatus;
       if (!copied) {
         const range = document.createRange();
         range.selectNodeContents(code);
@@ -66,11 +66,7 @@
         selection?.addRange(range);
       }
       resetTimer = setTimeout(() => {
-  const text = document.documentElement.lang.startsWith('en')
-    ? { copy: 'Copy', copied: 'Copied', manual: 'Copy manually', copiedStatus: 'Source copied to clipboard', manualStatus: 'Automatic copy failed. The source is selected; copy it manually.' }
-    : { copy: '复制', copied: '已复制', manual: '手动复制', copiedStatus: '源码已复制到剪贴板', manualStatus: '自动复制未成功，已选中源码，请手动复制。' };
-
-        label.textContent = text.copy;
+        label.textContent = labels.copy;
         delete button.dataset.state;
         status.textContent = '';
       }, copied ? 2200 : 6000);
