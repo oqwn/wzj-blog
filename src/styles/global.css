@@ -31,9 +31,18 @@ img { max-width: 100%; height: auto; }
 .site-header nav a { display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; border-radius: 5px; white-space: nowrap; }
 .site-header nav a:hover { background: var(--accent-wash); color: var(--accent); text-decoration: none; }
 .site-header nav a[aria-current='page'] { color: var(--accent); background: var(--accent-wash); font-weight: 500; }
+.lang-switch { border: 1px solid var(--line); font-weight: 500; }
 .skip-link { position: absolute; top: -80px; left: 16px; background: var(--paper); padding: 8px 14px; z-index: 10; }
 .skip-link:focus { top: 10px; }
 .site-description { margin: 24px 0 28px; padding-left: 12px; border-left: 2px solid #93b8aa; color: var(--muted); font-size: 14px; }
+.category-nav { display: flex; flex-wrap: wrap; gap: 6px; margin: -8px 0 22px; font-size: 13px; }
+.category-nav a { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); color: var(--muted); }
+.category-nav a:hover { color: var(--accent); border-color: #93b8aa; text-decoration: none; }
+.category-nav a[aria-current='page'] { color: var(--paper); background: var(--accent); border-color: var(--accent); }
+.category-nav span { font-size: 11px; opacity: .75; }
+.category-label { color: var(--accent); font-size: 12px; font-weight: 500; }
+.article-labels { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.not-found-en { margin-top: 28px; font-size: 13px; }
 .section-heading { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 12px; gap: 16px; }
 .section-heading h1 { font-size: 15px; font-weight: 600; }
 .section-heading > span { color: var(--muted); font-size: 11px; border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; }
@@ -78,7 +87,6 @@ img { max-width: 100%; height: auto; }
   .brand-mark { width: 24px; height: 24px; }
   .site-header nav { gap: 3px; font-size: 12px; }
   .site-header nav a { padding: 4px 6px; }
-  .writing-link svg { display: none; }
   .site-description { margin: 18px 0 24px; font-size: 13px; }
   .post-row { padding: 16px; }
   .post-row h2 { font-size: 16px; }

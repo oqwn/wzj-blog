@@ -1,0 +1,11 @@
+---
+import PostIndex from '../../components/PostIndex.astro';
+import { categories, type Category } from '../../lib/i18n';
+
+export function getStaticPaths() {
+  return categories.map((category) => ({ params: { category } }));
+}
+
+const category = Astro.params.category as Category;
+---
+<PostIndex lang="zh" category={category} />

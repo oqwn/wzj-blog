@@ -3,6 +3,7 @@ import rehypeKatex from 'rehype-katex';
 import rehypeMermaid from 'rehype-mermaid';
 import { rehypeShiki } from '@astrojs/markdown-remark';
 import { codeTheme, codeLineNumbers, rehypeCodeFrames } from './code-blocks.mjs';
+import { markdownLabels, rehypeLocalizeFootnotes } from './markdown-i18n.mjs';
 
 // Render a diagram once, retaining its original code in a native disclosure.
 function rehypeMermaidWithSource(options) {
@@ -28,7 +29,7 @@ function rehypeMermaidWithSource(options) {
           {
             type: 'element', tagName: 'details', properties: { className: ['diagram-source'] },
             children: [
-              { type: 'element', tagName: 'summary', properties: {}, children: [{ type: 'text', value: '查看 Mermaid 源码' }] },
+              { type: 'element', tagName: 'summary', properties: {}, children: [{ type: 'text', value: markdownLabels(file).mermaidSource }] },
               node,
             ],
           },
@@ -44,12 +45,12 @@ export const syntaxHighlight = false;
 
 // Keep wide diagrams readable on narrow screens without widening the page.
 export function rehypeDiagramFigures() {
-  return (tree) => {
+  return (tree, file) => {
     function walk(node) {
       if (!node.children) return;
       node.children = node.children.map((child) => {
         if (child.type === 'element' && child.tagName === 'img' && String(child.properties?.id).startsWith('mermaid-')) {
-          child.properties.alt ||= child.properties.title || 'Mermaid 图表';
+          child.properties.alt ||= child.properties.title || markdownLabels(file).diagram;
           return {
             type: 'element', tagName: 'figure',
             properties: { className: ['diagram'], tabIndex: 0, ariaLabel: child.properties.alt },
@@ -89,5 +90,6 @@ export const markdownPlugins = {
     [rehypeShiki, shikiConfig],
     rehypeCodeFrames,
     [rehypeKatex, { strict: 'error', trust: false }],
+    rehypeLocalizeFootnotes,
   ],
 };

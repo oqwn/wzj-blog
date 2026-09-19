@@ -2,33 +2,6 @@
 
 用 Markdown 记录技术实践、学习笔记和所思所想。推送到 `main` 后，GitHub Actions 自动检查、构建并发布到 GitHub Pages。
 
-## 在网页中写作
-
-博客的 **写作** 入口和文章页的 **编辑** 链接会打开 [Pages CMS 写作后台](https://app.pagescms.org/oqwn/wzj-blog/main/collection/posts)。使用 GitHub 登录，无需另建 Cloudflare 账号或手动粘贴个人令牌。后台管理登录会话；退出、会话过期或更换设备时需要重新登录，不保证永久免登录。
-
-首次连接：
-
-1. 点击 **Sign in with GitHub**，用作者账号 `oqwn` 登录。
-2. 按提示安装 Pages CMS 的 GitHub App。选择 **Only select repositories**，只勾选 **wzj-blog**。
-3. 打开 `oqwn / wzj-blog` 的 **main** 分支，进入 **文章**。仓库已提供 `.pages.yml`，无需重新编写配置。
-
-日常写作：
-
-- 新建或打开一篇文章，在表单中填写标题、日期、摘要和标签。新文章默认开启 **草稿**。
-- 正文的 **Source** 模式编辑 Markdown，**Editor** 模式查看和编辑排版。新建时可调整文件名，建议使用小写英文和连字符；发布后保持文件名不变，以免旧链接失效。
-- 点击保存会提交 Markdown 到 GitHub。关闭 **草稿** 后保存，现有 CI 自动构建、发布到博客；可在 [Actions](https://github.com/oqwn/wzj-blog/actions/workflows/pages.yml) 查看进度。
-- `draft: true` 不进入博客、RSS 或站点地图，**但源文件仍在公开仓库中可见**。
-
-正文使用 Markdown 格式保存，可继续在本地修改。网页保存后，本地写作前先运行 `git pull --ff-only`。后台排版视图与博客主题不完全一致，最终阅读效果以发布后的博客为准。图片可以在 Markdown 源码中引用 HTTPS 图片，或继续通过本地 Git 添加；当前未配置 CMS 图片上传目录。
-
-### 编辑权限
-
-访客能看到「写作」入口，但不会因此获得保存权限。Pages CMS 与 GitHub 检查登录身份和仓库授权；请勿向其他人开放仓库写入权限或邀请 CMS 协作者。配置文件只定义文章编辑表单，不是 GitHub 仓库权限边界。
-
-Pages CMS 是第三方托管服务，安装 GitHub App 相当于授权它访问所选仓库。只授权 `wzj-blog`，可在 [GitHub 已安装的应用](https://github.com/settings/installations) 随时调整或撤销。博客本身不接收或保存登录令牌，旧的个人令牌编辑器已移除；如果之前创建过专用个人令牌，可在 [GitHub 令牌设置](https://github.com/settings/personal-access-tokens) 手动撤销，移除编辑器不会自动撤销令牌。
-
-官方文档：[首次登录与安装](https://pagescms.org/docs/quick-start/)、[权限校验](https://pagescms.org/docs/development/authentication/)、[Markdown 编辑模式](https://pagescms.org/docs/configuration/fields/rich-text/)。
-
 - 博客地址：<https://oqwn.github.io/wzj-blog/>
 - 发布状态：[GitHub Actions](https://github.com/oqwn/wzj-blog/actions/workflows/pages.yml)
 - RSS：<https://oqwn.github.io/wzj-blog/rss.xml>
@@ -36,52 +9,56 @@ Pages CMS 是第三方托管服务，安装 GitHub App 相当于授权它访问�
 
 ## 开始写作
 
-在 `content/posts/` 中新建一个 `.md` 文件，例如 `my-first-post.md`：
+博客首页按 **财经**、**系统设计**、**编程技术** 三个分类展示，页头的 `EN` / `中文` 按钮切换语言。每篇文章写两份：中文版和英文版分别放在 `content/posts/zh/` 与 `content/posts/en/`，**文件名相同**即视为同一篇文章的两个版本，页面会自动互相链接。
+
+```text
+content/posts/
+├── zh/cache-design.md   → /wzj-blog/posts/cache-design/
+└── en/cache-design.md   → /wzj-blog/en/posts/cache-design/
+```
+
+推荐用命令同时生成中英文两份草稿（需要先安装依赖）：
+
+```bash
+npm run new -- cache-design "缓存设计笔记" "Notes on cache design" --category=system-design
+```
+
+也可以手动新建，例如 `content/posts/zh/cache-design.md`：
 
 ```markdown
 ---
-title: "我的第一篇技术文章"
+title: "缓存设计笔记"
 description: "用一两句话介绍这篇文章。"
-date: 2026-09-06
-tags: ["技术", "随笔"]
+category: system-design
+date: 2026-09-19
+tags: ["缓存"]
 draft: false
 ---
 
 这里开始写正文。
-
-## 我遇到的问题
-
-直接使用熟悉的 Markdown 语法。
-
-## 我的思考
-
-记录尝试的过程，也记录暂时没有答案的问题。
 ```
 
-文件名决定文章地址，例如 `my-first-post.md` 对应 `/wzj-blog/posts/my-first-post/`。建议使用小写英文和连字符；发布后尽量保持文件名不变，以免旧链接失效。支持按子目录整理文章。
+英文版 `content/posts/en/cache-design.md` 使用相同的 `category`，标题、摘要和正文写英文即可。
 
 | 字段 | 说明 |
 | --- | --- |
 | `title` | 必填，文章标题 |
+| `category` | 必填，`finance`（财经）、`system-design`（系统设计）或 `programming`（编程技术）；中英文两份必须一致 |
 | `date` | 必填，发布日期，推荐 `YYYY-MM-DD` |
 | `description` | 可选，列表、订阅和分享时的摘要 |
 | `tags` | 可选，标签数组 |
 | `draft` | 可选，默认 `false`；设为 `true` 时不生成网页，也不进入 RSS 和站点地图 |
 | `updated` | 可选，修改日期，例如 `2026-09-10` |
 
-`date` 用于展示和排序，不是定时发布开关。草稿通过 `draft` 控制，本地预览也会隐藏草稿；要预览正文，可临时改为 `false`，提交前恢复。
+文件名决定文章地址，建议使用小写英文和连字符；发布后尽量保持文件名不变，以免旧链接失效。支持按子目录整理文章，但中英文两边的子目录要一致。只写了一种语言也能发布，只是切换语言时会回到另一语言的首页；构建时会提示缺少的版本。两份分类不一致会导致构建失败。
+
+`date` 用于展示和排序，不是定时发布开关。草稿通过 `draft` 控制，本地预览也会隐藏草稿；要预览正文，可临时改为 `false`，提交前恢复。中英文两份的 `draft` 分别控制。
 
 仓库是公开的，`draft: true` 只隐藏网站上的文章，**不会隐藏 GitHub 中的源文件**。不要把私密笔记、密码或 API 密钥提交到仓库。
 
-也可以用命令生成一篇带当天日期的草稿（需要先安装依赖）：
+`zh/markdown-example.md` 和 `en/markdown-example.md` 是默认隐藏的写作模板。根目录原有的 `index.md` 已保留，Astro 不会将它作为博客文章发布。
 
-```bash
-npm run new -- learning-notes "最近的一些学习笔记"
-```
-
-这个命令不会覆盖同名文章。写好后把 `draft: true` 改为 `draft: false`。
-
-`markdown-example.md` 是默认隐藏的写作模板。根目录原有的 `index.md` 已保留，Astro 不会将它作为博客文章发布。
+中文 RSS 为 `rss.xml`，英文 RSS 为 `en/rss.xml`。
 
 ## 在本地预览
 
@@ -117,7 +94,7 @@ git push origin main
 
 打开仓库的 **Actions** 查看 `Build and deploy blog`。绿色成功后刷新博客即可看到更新。修改其他网站文件时，把对应文件一起提交。只在本地保存不会更新线上网站。
 
-不想使用命令行，也可以在 GitHub 的 `content/posts/` 目录选择 **Add file → Create new file**，填写文件名和正文，直接提交到 `main`。
+不想使用命令行，也可以在 GitHub 的 `content/posts/zh/` 和 `content/posts/en/` 目录选择 **Add file → Create new file**，填写文件名和正文，直接提交到 `main`。
 
 第一次使用或重新配置 Pages 时，在仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。本项目使用构建产物发布，不再使用根目录的 Jekyll 分支发布。
 
@@ -127,17 +104,17 @@ git push origin main
 - 向 `main` 发起 Pull Request：只检查和构建，不部署。
 - Actions 页面手动运行：选择 `main` 才会部署。
 
-自动部署 CI 无需添加个人访问令牌或自定义部署密钥。CI 使用 GitHub 提供的临时凭据，只有部署任务拥有 Pages 写入权限；构建失败时保留上一次成功发布的网站。网页编辑的作者授权与 CI 凭据彼此独立。
+自动部署 CI 无需添加个人访问令牌或自定义部署密钥。CI 使用 GitHub 提供的临时凭据，只有部署任务拥有 Pages 写入权限；构建失败时保留上一次成功发布的网站。
 
 ## 图片、链接和代码
 
 图片建议放在 `content/images/`，在文章中使用相对路径。Astro 会处理本地图片并生成适合部署路径的资源地址：
 
 ```markdown
-![示意图说明](../images/example.png)
+![示意图说明](../../images/example.png)
 ```
 
-文件名需要对应真实图片。子目录内文章要调整 `../` 的层级。普通附件可以放在 `public/`；引用它们时要考虑 GitHub Pages 的 `/wzj-blog/` 前缀。
+文件名需要对应真实图片，中英文两份可以共用同一张图。文章位于 `zh/` 或 `en/` 下，所以是 `../../images/`；更深的子目录要继续调整 `../` 的层级。普通附件可以放在 `public/`；引用它们时要考虑 GitHub Pages 的 `/wzj-blog/` 前缀。
 
 同级文章链接推荐使用相对网页地址，而不是 `.md` 源文件地址：
 
@@ -145,7 +122,7 @@ git push origin main
 [另一篇文章](../my-post/)
 ```
 
-标题会生成可展开的文章目录。围栏代码块标注语言后，发布页面会显示语言标签、行号和接近 IDEA 的深色语法高亮；`ts`、`py` 等常见缩写也支持。未指定或无法识别的语言按纯文本显示。右上角“复制”可复制完整源码并显示反馈，保留换行和缩进，不带行号；展开后的 Mermaid 源码同样支持。自动复制不可用时会选中源码并提示手动复制。长代码在框内横向滚动。代码样式配置在 `src/lib/code-blocks.mjs`。支持列表、引用、表格和任务列表。Pages CMS 的排版视图用于写作，代码高亮等细节以正式页面为准。
+标题会生成可展开的文章目录。围栏代码块标注语言后，发布页面会显示语言标签、行号和接近 IDEA 的深色语法高亮；`ts`、`py` 等常见缩写也支持。未指定或无法识别的语言按纯文本显示。右上角“复制”可复制完整源码并显示反馈，保留换行和缩进，不带行号；展开后的 Mermaid 源码同样支持。自动复制不可用时会选中源码并提示手动复制。长代码在框内横向滚动。代码样式配置在 `src/lib/code-blocks.mjs`。支持列表、引用、表格和任务列表。
 
 ## Mermaid、draw.io 与数学公式
 
@@ -168,15 +145,15 @@ draw.io 先导出 SVG 或 PNG，再像普通图片一样引用。原始 `.drawio
 
 公式使用 `$a^2+b^2=c^2$`（行内）或独占行的 `$$` 包住公式（独立公式）。支持 KaTeX 语法；公式样式和字体一起打包，不使用外部 CDN。显示美元金额时可以转义为 `\$19.99`。
 
-本项目使用 Astro 7 的 `unified` Markdown 处理器，配置在 `src/lib/markdown.mjs`。网页后台编辑含 Mermaid、公式或复杂 HTML 的文章时，使用 **Source** 模式；后台的 Editor 模式不保证与博客的扩展兼容。MDX、Obsidian 双链、`:::note` 等私有语法尚未接入；代码块不执行，页面禁止文章脚本和 iframe。CSP 仅按 SHA-256 内容哈希放行本站的复制脚本，不开放任意脚本或 API 请求。关闭 JavaScript 时复制按钮隐藏，文章、图表和手动选择复制仍可正常使用。
+本项目使用 Astro 7 的 `unified` Markdown 处理器，配置在 `src/lib/markdown.mjs`。MDX、Obsidian 双链、`:::note` 等私有语法尚未接入；代码块不执行，页面禁止文章脚本和 iframe。CSP 仅按 SHA-256 内容哈希放行本站的复制脚本，不开放任意脚本或 API 请求。关闭 JavaScript 时复制按钮隐藏，文章、图表和手动选择复制仍可正常使用。
 
 `npm run verify` 会检查有效与无效 Mermaid、特殊字符、公式和 GFM，并用禁用 JavaScript 的浏览器在 1440、390、320px 宽度下检查测试文章。可以单独运行 `npm run test:render`；设置 `SCREENSHOT_DIR=/tmp/blog-rendering` 可保存图表截图。删除测试文章后，浏览器样本检查会跳过，独立的 Markdown 回归测试仍会运行。
 
 ## 修改个人信息与外观
 
-- `src/config.ts`：博客名称、作者、介绍、GitHub 地址和写作后台链接。
-- `.pages.yml`：Pages CMS 的文章字段、Markdown 编辑模式和草稿默认值。
-- `src/pages/index.astro`：首页介绍。
+- `src/config.ts`：中英文博客名称、作者、介绍和 GitHub 地址。
+- `src/lib/i18n.ts`：分类名称和界面中英文文案。
+- `src/components/PostIndex.astro`：首页与分类页；`src/components/PostArticle.astro`：文章页。
 - `src/styles/global.css`：颜色、布局、导航及响应式样式。
 - `src/styles/prose.css`：正文、代码、表格等阅读样式。
 - `public/favicon.svg`：浏览器标签页图标。

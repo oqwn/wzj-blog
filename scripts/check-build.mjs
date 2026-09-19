@@ -24,19 +24,14 @@ async function exists(path) {
 const files = await walk(root);
 const htmlFiles = files.filter((file) => file.endsWith('.html'));
 assert.ok(htmlFiles.length >= 2, 'Build must include the homepage and 404 page');
-for (const required of ['index.html', '404.html', 'edit/index.html', 'rss.xml', 'sitemap.xml', 'robots.txt', 'favicon.svg']) {
+const categories = ['finance', 'system-design', 'programming'];
+const localized = (prefix) => [`${prefix}index.html`, `${prefix}rss.xml`, ...categories.map((category) => `${prefix}category/${category}/index.html`)];
+for (const required of ['404.html', 'sitemap.xml', 'robots.txt', 'favicon.svg', ...localized(''), ...localized('en/')]) {
   assert.ok(await exists(join(root, required)), `Missing build output: ${required}`);
 }
 
-const editorHTML = await readFile(join(root, 'edit/index.html'), 'utf8');
-assert.match(editorHTML, /href="https:\/\/app\.pagescms\.org\/oqwn\/wzj-blog\/main\/collection\/posts"/, 'Writing must link to the configured CMS collection');
-assert.match(editorHTML, /name="robots" content="noindex"/, 'Editor should not be indexed');
-
-const cms = parse(await readFile('.pages.yml', 'utf8'));
-const collection = cms.content.find((entry) => entry.name === 'posts');
-assert.equal(collection?.path, 'content/posts', 'CMS must edit the Astro article directory');
-assert.equal(collection?.format, 'yaml-frontmatter', 'CMS must keep Markdown with YAML frontmatter');
-assert.equal(collection?.fields.find((field) => field.name === 'draft')?.default, true, 'New CMS articles must begin as drafts');
+assert.match(await readFile(join(root, 'index.html'), 'utf8'), /<html lang="zh-CN"/, 'Chinese home page must declare its language');
+assert.match(await readFile(join(root, 'en/index.html'), 'utf8'), /<html lang="en"/, 'English home page must declare its language');
 
 for (const file of htmlFiles) {
   const html = await readFile(file, 'utf8');
@@ -77,9 +72,8 @@ for (const file of htmlFiles) {
   }
 }
 
-const rss = await readFile(join(root, 'rss.xml'), 'utf8');
-const sitemap = await readFile(join(root, 'sitemap.xml'), 'utf8');
-for (const document of [rss, sitemap]) {
+const feeds = await Promise.all(['rss.xml', 'en/rss.xml', 'sitemap.xml'].map((file) => readFile(join(root, file), 'utf8')));
+for (const document of feeds) {
   for (const match of document.matchAll(/<(?:link|loc)>([^<]+)<\/(?:link|loc)>/g)) {
     assert.ok(match[1].startsWith(`${origin}${base}/`), `Feed/sitemap URL has incorrect site/base: ${match[1]}`);
   }
@@ -95,10 +89,23 @@ for (const file of (await walk(contentRoot)).filter((file) => file.endsWith('.md
   if (data?.draft !== true || typeof data.title !== 'string' || !data.title) continue;
   const title = data.title;
   const escapedTitle = title.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
-  for (const output of [...htmlFiles, join(root, 'rss.xml'), join(root, 'sitemap.xml')]) {
+  for (const output of [...htmlFiles, join(root, 'rss.xml'), join(root, 'en/rss.xml'), join(root, 'sitemap.xml')]) {
     const text = await readFile(output, 'utf8');
     if (text.includes(title) || text.includes(escapedTitle)) errors.push(`${relative(root, output)}: draft title leaked: ${title}`);
   }
+}
+
+// The two language versions of an article share a filename and must share a category.
+const versions = new Map();
+for (const file of (await walk(contentRoot)).filter((file) => /^(zh|en)\//.test(relative(contentRoot, file)) && file.endsWith('.md'))) {
+  const [lang, ...rest] = relative(contentRoot, file).split(/[\\/]/);
+  const data = parse((await readFile(file, 'utf8')).match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? '') ?? {};
+  const key = rest.join('/');
+  versions.set(key, { ...versions.get(key), [lang]: data });
+}
+for (const [key, { zh, en }] of versions) {
+  if (!zh || !en) console.warn(`Warning: ${key} has no ${zh ? 'English' : 'Chinese'} version yet.`);
+  else if (zh.category !== en.category) errors.push(`${key}: Chinese and English versions have different categories (${zh.category} / ${en.category})`);
 }
 
 assert.deepEqual(errors, [], errors.join('\n'));

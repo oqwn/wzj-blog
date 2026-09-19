@@ -1,0 +1,15 @@
+---
+import PostArticle from '../../components/PostArticle.astro';
+import { getPosts, postSlug, type Post } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPosts('zh');
+  return posts.map((post, index) => ({
+    params: { slug: postSlug(post) },
+    props: { post, newer: posts[index - 1], older: posts[index + 1] },
+  }));
+}
+
+interface Props { post: Post; newer?: Post; older?: Post; }
+---
+<PostArticle lang="zh" {...Astro.props} />

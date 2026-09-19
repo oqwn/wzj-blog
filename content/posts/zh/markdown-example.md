@@ -2,6 +2,7 @@
 title: "Markdown 写作示例（草稿）"
 description: "复制常用的 Markdown 写法，开始下一篇文章。"
 date: 2026-09-06
+category: programming
 tags: ["Markdown"]
 draft: true
 ---

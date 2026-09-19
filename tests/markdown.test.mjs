@@ -77,3 +77,14 @@ test('invalid Mermaid syntax fails instead of silently publishing a missing diag
   t.mock.method(console, 'error', () => {});
   await assert.rejects(processor.render('```mermaid\nflowchart LR\nA[未闭合 --> B\n```'), /parse|syntax|mermaid/i);
 });
+
+test('English posts get English code, diagram and footnote labels', async () => {
+  const source = ['```ts', 'const a = 1;', '```', '', '```text', 'plain', '```', '', 'Note[^a].', '', '[^a]: Footnote.'].join('\n');
+  const { code } = await processor.render(source, { fileURL: new URL('../content/posts/en/sample.md', import.meta.url) });
+  assert.match(code, /class="copy-label">Copy</);
+  assert.match(code, /aria-label="Copy TypeScript code"/);
+  assert.match(code, /class="code-language">Plain text</);
+  assert.match(code, /id="footnote-label"[^>]*>Footnotes</);
+  assert.match(code, /aria-label="Back to content/);
+  assert.doesNotMatch(code, /复制|纯文本|脚注|返回正文/);
+});

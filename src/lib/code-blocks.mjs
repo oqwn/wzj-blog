@@ -29,22 +29,26 @@ const languageNames = {
   c: 'C', cpp: 'C++', 'c++': 'C++', csharp: 'C#', cs: 'C#',
   php: 'PHP', swift: 'Swift', vue: 'Vue', astro: 'Astro',
   docker: 'Dockerfile', dockerfile: 'Dockerfile', diff: 'Diff',
-  text: '纯文本', txt: '纯文本', plaintext: '纯文本',
 };
 
+import { markdownLabels } from './markdown-i18n.mjs';
+
+const plainText = new Set(['text', 'txt', 'plaintext']);
+
 export function rehypeCodeFrames() {
-  return (tree) => {
+  return (tree, file) => {
+    const text = markdownLabels(file);
     function walk(node) {
       if (!node.children) return;
       node.children = node.children.map((child) => {
         if (child.type === 'element' && child.tagName === 'pre' && child.properties?.dataLanguage) {
           const language = String(child.properties.dataLanguage);
-          const label = languageNames[language.toLowerCase()] || language;
+          const label = plainText.has(language.toLowerCase()) ? text.plainText : languageNames[language.toLowerCase()] || language;
           child.properties.tabIndex = 0;
-          child.properties.ariaLabel = `${label} 源码`;
+          child.properties.ariaLabel = text.source(label);
           return {
             type: 'element', tagName: 'div',
-            properties: { className: ['code-block'], role: 'group', ariaLabel: `${label} 代码块` },
+            properties: { className: ['code-block'], role: 'group', ariaLabel: text.codeBlock(label) },
             children: [
               {
                 type: 'element', tagName: 'div', properties: { className: ['code-header'] },
@@ -52,7 +56,7 @@ export function rehypeCodeFrames() {
                   { type: 'element', tagName: 'span', properties: { className: ['code-language'] }, children: [{ type: 'text', value: label }] },
                   {
                     type: 'element', tagName: 'button',
-                    properties: { type: 'button', className: ['code-copy'], hidden: true, ariaLabel: `复制 ${label} 代码` },
+                    properties: { type: 'button', className: ['code-copy'], hidden: true, ariaLabel: text.copyCode(label) },
                     children: [
                       {
                         type: 'element', tagName: 'svg',
@@ -62,7 +66,7 @@ export function rehypeCodeFrames() {
                           { type: 'element', tagName: 'path', properties: { d: 'M10.5 5.5v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2' }, children: [] },
                         ],
                       },
-                      { type: 'element', tagName: 'span', properties: { className: ['copy-label'] }, children: [{ type: 'text', value: '复制' }] },
+                      { type: 'element', tagName: 'span', properties: { className: ['copy-label'] }, children: [{ type: 'text', value: text.copy }] },
                     ],
                   },
                   { type: 'element', tagName: 'span', properties: { className: ['copy-status', 'sr-only'], role: 'status', ariaLive: 'polite' }, children: [] },

@@ -1,12 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { withBase } from '../lib/paths';
+import { localePath } from '../lib/paths';
 ---
-<BaseLayout title="页面未找到" noindex>
+<BaseLayout title="页面未找到 / Page not found" noindex>
   <div class="not-found">
     <p>404</p>
     <h1>页面未找到</h1>
     <p>文章可能已移动，或链接有误。</p>
-    <a href={withBase()}>回到首页</a>
+    <a href={localePath('zh')}>回到首页</a>
+    <p lang="en" class="not-found-en">Page not found. <a href={localePath('en')}>Back to the English home page</a></p>
   </div>
 </BaseLayout>

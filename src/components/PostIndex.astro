@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getPosts, postSlug, formatDate } from '../lib/posts';
+import { localePath, postPath, categoryPath } from '../lib/paths';
+import { ui, categories, categoryLabels, otherLang, type Lang, type Category } from '../lib/i18n';
+import { blog } from '../config';
+
+interface Props { lang: Lang; category?: Category; }
+const { lang, category } = Astro.props;
+const t = ui[lang];
+const labels = categoryLabels[lang];
+const posts = await getPosts(lang, category);
+const counts = Object.fromEntries(await Promise.all(categories.map(async (name) => [name, (await getPosts(lang, name)).length])));
+const total = category ? (await getPosts(lang)).length : posts.length;
+const other = otherLang(lang);
+const alternate = category ? categoryPath(other, category) : localePath(other);
+const heading = category ? labels[category] : t.posts;
+---
+<BaseLayout lang={lang} alternate={alternate} home={!category} title={category && labels[category]}>
+  <p class="site-description">{blog[lang].description}</p>
+
+  <nav class="category-nav" aria-label={t.categories}>
+    <a href={localePath(lang)} aria-current={!category ? 'page' : undefined}>{t.all}<span>{total}</span></a>
+    {categories.map((name) => (
+      <a href={categoryPath(lang, name)} aria-current={name === category ? 'page' : undefined}>{labels[name]}<span>{counts[name]}</span></a>
+    ))}
+  </nav>
+
+  <section class="writing" aria-labelledby="writing-title">
+    <div class="section-heading">
+      <h1 id="writing-title">{heading}</h1>
+      <span>{t.count(posts.length)}</span>
+    </div>
+    {posts.length === 0 ? (
+      <p class="empty-state">{t.empty}</p>
+    ) : (
+      <ol class="post-list">
+        {posts.map((post) => (
+          <li class="post-row">
+            <article>
+              <h2><a href={postPath(lang, postSlug(post))}>{post.data.title}</a></h2>
+              {post.data.description && <p>{post.data.description}</p>}
+              <div class="post-meta">
+                <time class="post-date" datetime={post.data.date.toISOString()}>{formatDate(post.data.date, lang)}</time>
+                {!category && <a class="category-label" href={categoryPath(lang, post.data.category)}>{labels[post.data.category]}</a>}
+                <ul class="tags" aria-label={t.tags}>{post.data.tags.map((tag) => <li>{tag}</li>)}</ul>
+              </div>
+            </article>
+          </li>
+        ))}
+      </ol>
+    )}
+  </section>
+</BaseLayout>
