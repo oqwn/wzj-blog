@@ -60,6 +60,55 @@ draft: false
 
 中文 RSS 为 `rss.xml`，英文 RSS 为 `en/rss.xml`。
 
+## 让其他项目通过 MCP 写文章
+
+`scripts/mcp-server.mjs` 是一个本地 MCP 服务，供其他项目里的 Claude Code、Claude Desktop、Cursor 等工具直接为博客写文章。它只提供两个工具：
+
+| 工具 | 作用 |
+| --- | --- |
+| `create_post` | 一次提交中英文两份：`slug`、`category`、`zh`、`en`（各含 `title`、`description`、`body`、`tags`），写入 `content/posts/zh/<slug>.md` 和 `content/posts/en/<slug>.md` |
+| `list_posts` | 只读，列出已有文章（含草稿），避免重名 |
+
+安全边界：只能新建文件，不能修改、删除已有文章，不能写到 `content/posts/` 之外；中英文两份必须同时提供，写入失败时两份都不保留；新文章一律是草稿（`draft: true`），**MCP 不能提交、推送或发布**，发布需要你亲自运行下面的 `publish-post`。
+
+注册到 Claude Code，所有项目都可使用（`--scope user`）：
+
+```bash
+claude mcp add --scope user wzj-blog-posts -- /opt/homebrew/opt/node@24/bin/node /Users/mac/Documents/individual/wzj-blog/scripts/mcp-server.mjs
+```
+
+其他客户端在 MCP 配置中加入同样的命令即可，例如：
+
+```json
+{
+  "mcpServers": {
+    "wzj-blog-posts": {
+      "command": "/opt/homebrew/opt/node@24/bin/node",
+      "args": ["/Users/mac/Documents/individual/wzj-blog/scripts/mcp-server.mjs"]
+    }
+  }
+}
+```
+
+使用前先在本仓库运行 `npm ci` 安装依赖。服务按脚本位置定位文章目录，与客户端的工作目录无关。任何能调用该工具的 AI 都能新建草稿，包括处理网页等外部内容时受到诱导的 AI；草稿源文件提交后会出现在公开仓库中，发布前请检查内容。
+
+## 发布草稿
+
+检查过 `content/posts/zh/<slug>.md` 和 `content/posts/en/<slug>.md` 后，在本仓库运行：
+
+```bash
+PATH=/opt/homebrew/opt/node@24/bin:$PATH npm run publish-post -- <slug>
+```
+
+命令会显示两份标题并请你确认，然后：
+
+1. 把两份的 `draft` 改为 `false`；
+2. 在临时目录完整构建并运行链接、订阅和草稿检查，不通过就恢复为草稿，不提交；
+3. 只提交这两个文件，工作区里其他已暂存或未暂存的修改都不会被带进去；
+4. 推送到 `main`，触发 GitHub Actions 部署。
+
+要求当前在 `main` 分支；远程有新提交时会先快进同步，无法快进就停止。推送失败会如实报错，不会强制推送。推送成功不等于已上线，Actions 部署成功后文章才会出现在网站上。`--yes` 可跳过确认，只在你自己确认过内容时使用。
+
 ## 在本地预览
 
 使用 Node.js 24（项目提供 `.nvmrc`）：
