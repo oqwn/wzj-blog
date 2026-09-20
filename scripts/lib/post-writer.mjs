@@ -1,7 +1,7 @@
 import { mkdir, writeFile, access, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-export const categories = ['finance', 'system-design', 'programming'];
+export const categories = ['finance', 'business-cases', 'system-design', 'programming', 'personal-growth'];
 export const languages = ['zh', 'en'];
 export const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 

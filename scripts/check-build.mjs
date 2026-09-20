@@ -24,7 +24,7 @@ async function exists(path) {
 const files = await walk(root);
 const htmlFiles = files.filter((file) => file.endsWith('.html'));
 assert.ok(htmlFiles.length >= 2, 'Build must include the homepage and 404 page');
-const categories = ['finance', 'system-design', 'programming'];
+const categories = ['finance', 'business-cases', 'system-design', 'programming', 'personal-growth'];
 const localized = (prefix) => [`${prefix}index.html`, `${prefix}rss.xml`, ...categories.map((category) => `${prefix}category/${category}/index.html`)];
 for (const required of ['404.html', 'sitemap.xml', 'robots.txt', 'favicon.svg', ...localized(''), ...localized('en/')]) {
   assert.ok(await exists(join(root, required)), `Missing build output: ${required}`);

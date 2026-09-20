@@ -4,11 +4,11 @@ export const blog = {
   zh: {
     title: '温智钧的博客',
     author: '温智钧',
-    description: '财经观察、系统设计与编程实践。',
+    description: '财经观察、商业案例、系统设计、编程实践与个人成长。',
   },
   en: {
     title: "Zhijun Wen's Blog",
     author: 'Zhijun Wen',
-    description: 'Notes on finance, system design, and programming.',
+    description: 'Notes on finance, business cases, system design, programming and personal growth.',
   },
 };

@@ -1,230 +1,51 @@
 # 温智钧的博客
 
-用 Markdown 记录技术实践、学习笔记和所思所想。推送到 `main` 后，GitHub Actions 自动检查、构建并发布到 GitHub Pages。
+我的个人博客，中英双语，记录我平时在看和在想的东西：
 
-- 博客地址：<https://oqwn.github.io/wzj-blog/>
-- 发布状态：[GitHub Actions](https://github.com/oqwn/wzj-blog/actions/workflows/pages.yml)
-- RSS：<https://oqwn.github.io/wzj-blog/rss.xml>
-- 技术栈：Astro、TypeScript、纯静态 HTML/CSS，无需数据库。
+- **财经** —— 市场、宏观和投资笔记
+- **商业案例** —— 公司、生意模式的拆解
+- **系统设计** —— 架构与工程实践
+- **编程技术** —— 写代码时的经验和踩坑
+- **个人成长** —— 学习方法、习惯和思考
 
-## 开始写作
+地址：<https://oqwn.github.io/wzj-blog/> ｜ RSS：<https://oqwn.github.io/wzj-blog/rss.xml>
 
-博客首页按 **财经**、**系统设计**、**编程技术** 三个分类展示，页头的 `EN` / `中文` 按钮切换语言。每篇文章写两份：中文版和英文版分别放在 `content/posts/zh/` 与 `content/posts/en/`，**文件名相同**即视为同一篇文章的两个版本，页面会自动互相链接。
+用 Astro 生成纯静态页面，推送到 `main` 后由 GitHub Actions 自动构建并发布。
 
-```text
-content/posts/
-├── zh/cache-design.md   → /wzj-blog/posts/cache-design/
-└── en/cache-design.md   → /wzj-blog/en/posts/cache-design/
-```
+## 写作
 
-推荐用命令同时生成中英文两份草稿（需要先安装依赖）：
+中英文各一份，文件名相同即为同一篇文章：`content/posts/zh/<slug>.md` 和 `content/posts/en/<slug>.md`。新建草稿：
 
 ```bash
 npm run new -- cache-design "缓存设计笔记" "Notes on cache design" --category=system-design
 ```
 
-也可以手动新建，例如 `content/posts/zh/cache-design.md`：
+frontmatter 里 `title`、`category`、`date` 必填，`category` 取 `finance`、`business-cases`、`system-design`、`programming`、`personal-growth` 之一，中英文两份必须一致。新文章默认 `draft: true`，不会出现在网站上（但源文件在公开仓库里可见）。
 
-```markdown
----
-title: "缓存设计笔记"
-description: "用一两句话介绍这篇文章。"
-category: system-design
-date: 2026-09-19
-tags: ["缓存"]
-draft: false
----
-
-这里开始写正文。
-```
-
-英文版 `content/posts/en/cache-design.md` 使用相同的 `category`，标题、摘要和正文写英文即可。
-
-| 字段 | 说明 |
-| --- | --- |
-| `title` | 必填，文章标题 |
-| `category` | 必填，`finance`（财经）、`system-design`（系统设计）或 `programming`（编程技术）；中英文两份必须一致 |
-| `date` | 必填，发布日期，推荐 `YYYY-MM-DD` |
-| `description` | 可选，列表、订阅和分享时的摘要 |
-| `tags` | 可选，标签数组 |
-| `draft` | 可选，默认 `false`；设为 `true` 时不生成网页，也不进入 RSS 和站点地图 |
-| `updated` | 可选，修改日期，例如 `2026-09-10` |
-
-文件名决定文章地址，建议使用小写英文和连字符；发布后尽量保持文件名不变，以免旧链接失效。支持按子目录整理文章，但中英文两边的子目录要一致。只写了一种语言也能发布，只是切换语言时会回到另一语言的首页；构建时会提示缺少的版本。两份分类不一致会导致构建失败。
-
-`date` 用于展示和排序，不是定时发布开关。草稿通过 `draft` 控制，本地预览也会隐藏草稿；要预览正文，可临时改为 `false`，提交前恢复。中英文两份的 `draft` 分别控制。
-
-仓库是公开的，`draft: true` 只隐藏网站上的文章，**不会隐藏 GitHub 中的源文件**。不要把私密笔记、密码或 API 密钥提交到仓库。
-
-`zh/markdown-example.md` 和 `en/markdown-example.md` 是默认隐藏的写作模板。根目录原有的 `index.md` 已保留，Astro 不会将它作为博客文章发布。
-
-中文 RSS 为 `rss.xml`，英文 RSS 为 `en/rss.xml`。
-
-## 让其他项目通过 MCP 写文章
-
-`scripts/mcp-server.mjs` 是一个本地 MCP 服务，供其他项目里的 Claude Code、Claude Desktop、Cursor 等工具直接为博客写文章。它只提供两个工具：
-
-| 工具 | 作用 |
-| --- | --- |
-| `create_post` | 一次提交中英文两份：`slug`、`category`、`zh`、`en`（各含 `title`、`description`、`body`、`tags`），写入 `content/posts/zh/<slug>.md` 和 `content/posts/en/<slug>.md` |
-| `list_posts` | 只读，列出已有文章（含草稿），避免重名 |
-
-安全边界：只能新建文件，不能修改、删除已有文章，不能写到 `content/posts/` 之外；中英文两份必须同时提供，写入失败时两份都不保留；新文章一律是草稿（`draft: true`），**MCP 不能提交、推送或发布**，发布需要你亲自运行下面的 `publish-post`。
-
-注册到 Claude Code，所有项目都可使用（`--scope user`）：
+确认内容后发布：
 
 ```bash
-claude mcp add --scope user wzj-blog-posts -- /opt/homebrew/opt/node@24/bin/node /Users/mac/Documents/individual/wzj-blog/scripts/mcp-server.mjs
+npm run publish-post -- cache-design
 ```
 
-其他客户端在 MCP 配置中加入同样的命令即可，例如：
+它会把两份改成非草稿、完整构建检查一遍，然后只提交这两个文件并推送。
 
-```json
-{
-  "mcpServers": {
-    "wzj-blog-posts": {
-      "command": "/opt/homebrew/opt/node@24/bin/node",
-      "args": ["/Users/mac/Documents/individual/wzj-blog/scripts/mcp-server.mjs"]
-    }
-  }
-}
-```
+## 本地预览
 
-使用前先在本仓库运行 `npm ci` 安装依赖。服务按脚本位置定位文章目录，与客户端的工作目录无关。任何能调用该工具的 AI 都能新建草稿，包括处理网页等外部内容时受到诱导的 AI；草稿源文件提交后会出现在公开仓库中，发布前请检查内容。
-
-## 发布草稿
-
-检查过 `content/posts/zh/<slug>.md` 和 `content/posts/en/<slug>.md` 后，在本仓库运行：
+需要 Node.js 24（见 `.nvmrc`）：
 
 ```bash
-PATH=/opt/homebrew/opt/node@24/bin:$PATH npm run publish-post -- <slug>
-```
-
-命令会显示两份标题并请你确认，然后：
-
-1. 把两份的 `draft` 改为 `false`；
-2. 在临时目录完整构建并运行链接、订阅和草稿检查，不通过就恢复为草稿，不提交；
-3. 只提交这两个文件，工作区里其他已暂存或未暂存的修改都不会被带进去；
-4. 推送到 `main`，触发 GitHub Actions 部署。
-
-要求当前在 `main` 分支；远程有新提交时会先快进同步，无法快进就停止。推送失败会如实报错，不会强制推送。推送成功不等于已上线，Actions 部署成功后文章才会出现在网站上。`--yes` 可跳过确认，只在你自己确认过内容时使用。
-
-## 在本地预览
-
-使用 Node.js 24（项目提供 `.nvmrc`）：
-
-```bash
-nvm install
 nvm use
 npm ci
 npm run setup:diagrams
 npm run dev
 ```
 
-打开终端显示的地址，并加上 `/wzj-blog/`，通常是 <http://localhost:4321/wzj-blog/>。保存 Markdown 后即可查看更新。
+打开 <http://localhost:4321/wzj-blog/>。`npm run verify` 跑类型、渲染、构建和链接检查。
 
-```bash
-npm run verify    # 类型、Markdown 渲染、生产构建、链接、草稿和浏览器检查
-npm run build     # 生成 dist/ 静态网站
-npm run preview   # 预览生产构建
-```
+## 其他
 
-Astro 7 的开发服务可能在后台运行；可使用 `npx astro dev stop` 停止。
-
-`setup:diagrams` 首次下载用于生成 Mermaid 图片的 Chromium。更新 Playwright 版本后需要再运行一次。Linux 若缺少系统依赖，执行 `npx playwright install --with-deps chromium --only-shell`，并安装中文字体（例如 `fonts-noto-cjk`）。GitHub Actions 已配置好这些步骤。
-
-## 发布文章
-
-```bash
-git add content/
-git commit -m "docs: add a new post"
-git push origin main
-```
-
-打开仓库的 **Actions** 查看 `Build and deploy blog`。绿色成功后刷新博客即可看到更新。修改其他网站文件时，把对应文件一起提交。只在本地保存不会更新线上网站。
-
-不想使用命令行，也可以在 GitHub 的 `content/posts/zh/` 和 `content/posts/en/` 目录选择 **Add file → Create new file**，填写文件名和正文，直接提交到 `main`。
-
-第一次使用或重新配置 Pages 时，在仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。本项目使用构建产物发布，不再使用根目录的 Jekyll 分支发布。
-
-工作流触发规则：
-
-- 推送到 `main`：检查、测试、构建，成功后部署。
-- 向 `main` 发起 Pull Request：只检查和构建，不部署。
-- Actions 页面手动运行：选择 `main` 才会部署。
-
-自动部署 CI 无需添加个人访问令牌或自定义部署密钥。CI 使用 GitHub 提供的临时凭据，只有部署任务拥有 Pages 写入权限；构建失败时保留上一次成功发布的网站。
-
-## 图片、链接和代码
-
-图片建议放在 `content/images/`，在文章中使用相对路径。Astro 会处理本地图片并生成适合部署路径的资源地址：
-
-```markdown
-![示意图说明](../../images/example.png)
-```
-
-文件名需要对应真实图片，中英文两份可以共用同一张图。文章位于 `zh/` 或 `en/` 下，所以是 `../../images/`；更深的子目录要继续调整 `../` 的层级。普通附件可以放在 `public/`；引用它们时要考虑 GitHub Pages 的 `/wzj-blog/` 前缀。
-
-同级文章链接推荐使用相对网页地址，而不是 `.md` 源文件地址：
-
-```markdown
-[另一篇文章](../my-post/)
-```
-
-标题会生成可展开的文章目录。围栏代码块标注语言后，发布页面会显示语言标签、行号和接近 IDEA 的深色语法高亮；`ts`、`py` 等常见缩写也支持。未指定或无法识别的语言按纯文本显示。右上角“复制”可复制完整源码并显示反馈，保留换行和缩进，不带行号；展开后的 Mermaid 源码同样支持。自动复制不可用时会选中源码并提示手动复制。长代码在框内横向滚动。代码样式配置在 `src/lib/code-blocks.mjs`。支持列表、引用、表格和任务列表。
-
-## Mermaid、draw.io 与数学公式
-
-博客支持 Mermaid 图、draw.io 导出的 SVG、代码高亮、表格对齐、合并单元格、任务列表、脚注、折叠和数学公式。Markdown 回归测试保留在 `tests/markdown.test.mjs`，不代表兼容所有 Markdown 方言。
-
-使用 `mermaid` 代码块写图，推荐提供可访问性说明：
-
-````markdown
-```mermaid
-flowchart LR
-    accTitle: 文章发布流程
-    accDescr: 写作后保存到仓库，再发布到博客。
-    A[写作] --> B[保存] --> C[发布]
-```
-````
-
-Mermaid 在构建时渲染成 SVG 图片，读者不需要运行脚本；大图可以在图框中横向滚动，图下的“查看 Mermaid 源码”可展开带高亮的原始代码。错误语法会导致构建失败，保留上一次成功部署。
-
-draw.io 先导出 SVG 或 PNG，再像普通图片一样引用。原始 `.drawio` 文件可与图片一起放在 `content/images/`，作为可编辑源文件保存，但它不是浏览器能直接显示的图片。示例图由 draw.io 官方嵌入接口导出，SVG 已存入仓库，后续构建不依赖 draw.io 服务。
-
-公式使用 `$a^2+b^2=c^2$`（行内）或独占行的 `$$` 包住公式（独立公式）。支持 KaTeX 语法；公式样式和字体一起打包，不使用外部 CDN。显示美元金额时可以转义为 `\$19.99`。
-
-本项目使用 Astro 7 的 `unified` Markdown 处理器，配置在 `src/lib/markdown.mjs`。MDX、Obsidian 双链、`:::note` 等私有语法尚未接入；代码块不执行，页面禁止文章脚本和 iframe。CSP 仅按 SHA-256 内容哈希放行本站的复制脚本，不开放任意脚本或 API 请求。关闭 JavaScript 时复制按钮隐藏，文章、图表和手动选择复制仍可正常使用。
-
-`npm run verify` 会检查有效与无效 Mermaid、特殊字符、公式和 GFM，并用禁用 JavaScript 的浏览器在 1440、390、320px 宽度下检查测试文章。可以单独运行 `npm run test:render`；设置 `SCREENSHOT_DIR=/tmp/blog-rendering` 可保存图表截图。删除测试文章后，浏览器样本检查会跳过，独立的 Markdown 回归测试仍会运行。
-
-## 修改个人信息与外观
-
-- `src/config.ts`：中英文博客名称、作者、介绍和 GitHub 地址。
-- `src/lib/i18n.ts`：分类名称和界面中英文文案。
-- `src/components/PostIndex.astro`：首页与分类页；`src/components/PostArticle.astro`：文章页。
-- `src/styles/global.css`：颜色、布局、导航及响应式样式。
-- `src/styles/prose.css`：正文、代码、表格等阅读样式。
-- `public/favicon.svg`：浏览器标签页图标。
-- `astro.config.mjs`：站点域名和部署路径。
-
-默认使用系统中文字体，页面阅读不依赖外部字体、脚本 CDN 或 JavaScript 框架运行时。
-
-## 部署到其他平台或绑定域名
-
-完整配置和免费平台对比见 [部署说明](docs/deployment.md)。
-
-任何静态托管平台都可使用以下配置：
-
-以下构建命令要求环境已安装上述 Chromium 及系统依赖。受限平台若无法安装，可由 GitHub Actions 构建，再将 `dist/` 静态产物上传到该平台；不要直接沿用缺少图表渲染环境的构建步骤。
-
-| 设置 | 值 |
-| --- | --- |
-| Node.js | `24` |
-| 安装命令 | `npm ci` |
-| 构建命令 | `npm run build` |
-| 输出目录 | `dist` |
-| 环境变量 `SITE_URL` | 最终网站的域名，例如 `https://blog.example.com` |
-| 环境变量 `BASE_PATH` | 根域名部署填 `/`；GitHub 项目 Pages 默认 `/wzj-blog` |
-
-域名和路径配置必须与实际访问地址一致，否则样式、文章链接和 RSS 会指向错误位置。
+- 分类名称和界面文案：`src/lib/i18n.ts`；博客名称和简介：`src/config.ts`；样式：`src/styles/`。
+- 支持 Mermaid 图、数学公式、代码高亮和脚注，写法参考 `content/posts/zh/markdown-example.md`。
+- 其他项目里的 AI 可以通过 `scripts/mcp-server.mjs`（MCP）帮我起草文章，但只能写草稿，发布仍然由我手动执行。
+- 部署到其他平台或绑定域名：见 [部署说明](docs/deployment.md)。

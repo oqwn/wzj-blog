@@ -27,7 +27,7 @@ server.registerTool('create_post', {
   description: [
     'Create one blog post as two Markdown files: content/posts/zh/<slug>.md (Chinese) and content/posts/en/<slug>.md (English).',
     'Both versions are required and are saved as drafts. This tool cannot publish: the blog owner reviews the drafts and publishes them with npm run publish-post -- <slug>.',
-    'Categories: finance (财经), system-design (系统设计), programming (编程技术).',
+    'Categories: finance (财经), business-cases (商业案例), system-design (系统设计), programming (编程技术), personal-growth (个人成长).',
     'Bodies are Markdown with GFM, fenced code, Mermaid code blocks and $math$. Start sections at ## (the title is rendered as h1).',
     'Existing posts are never overwritten; call list_posts first to pick an unused slug.',
   ].join(' '),

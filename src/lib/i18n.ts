@@ -1,12 +1,24 @@
 export const languages = ['zh', 'en'] as const;
 export type Lang = (typeof languages)[number];
 
-export const categories = ['finance', 'system-design', 'programming'] as const;
+export const categories = ['finance', 'business-cases', 'system-design', 'programming', 'personal-growth'] as const;
 export type Category = (typeof categories)[number];
 
 export const categoryLabels: Record<Lang, Record<Category, string>> = {
-  zh: { finance: '财经', 'system-design': '系统设计', programming: '编程技术' },
-  en: { finance: 'Finance', 'system-design': 'System Design', programming: 'Programming' },
+  zh: {
+    finance: '财经',
+    'business-cases': '商业案例',
+    'system-design': '系统设计',
+    programming: '编程技术',
+    'personal-growth': '个人成长',
+  },
+  en: {
+    finance: 'Finance',
+    'business-cases': 'Business Cases',
+    'system-design': 'System Design',
+    programming: 'Programming',
+    'personal-growth': 'Personal Growth',
+  },
 };
 
 export const ui = {
